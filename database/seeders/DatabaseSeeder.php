@@ -27,6 +27,10 @@ class DatabaseSeeder extends Seeder
             EmployeeSeeder::class,
             MaterialInventorySeeder::class,
             BOMSeeder::class,
+            AttendanceRecordsSeeder::class,
+            ProductionLogsSeeder::class,
+            QualityChecksSeeder::class,
+            EmployeeEventsSeeder::class,
         ]);
     }
 }

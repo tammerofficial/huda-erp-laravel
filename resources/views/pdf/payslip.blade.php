@@ -1,160 +1,175 @@
 <!DOCTYPE html>
-<html dir="rtl">
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>Payslip #{{ $payroll->id }}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payslip - {{ $payroll->employee->user->name }}</title>
     <style>
-        body { 
-            font-family: 'DejaVu Sans', sans-serif; 
+        body {
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
+            color: #333;
         }
-        .header { 
-            text-align: center; 
+        .header {
+            text-align: center;
             margin-bottom: 30px;
-            border-bottom: 2px solid #d4af37;
+            border-bottom: 2px solid #333;
             padding-bottom: 20px;
         }
-        .company-info {
-            font-size: 18px;
-            font-weight: bold;
-            color: #d4af37;
-        }
-        .employee-info { 
-            margin: 20px 0; 
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
-        }
-        .salary-details {
+        .employee-info {
             display: flex;
             justify-content: space-between;
-            margin: 20px 0;
+            margin-bottom: 30px;
         }
-        .salary-breakdown {
+        .employee-details, .payroll-details {
             width: 48%;
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
         }
-        .deductions {
-            width: 48%;
-            background: #fff3cd;
-            padding: 15px;
-            border-radius: 5px;
+        .employee-details h3, .payroll-details h3 {
+            margin-top: 0;
+            color: #333;
         }
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            margin-top: 20px;
+        .earnings-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
         }
-        th, td { 
-            border: 1px solid #ddd; 
-            padding: 12px; 
-            text-align: right; 
+        .earnings-table th, .earnings-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
         }
-        th { 
-            background-color: #d4af37; 
-            color: white;
+        .earnings-table th {
+            background-color: #f5f5f5;
             font-weight: bold;
         }
-        .total { 
-            font-size: 18px; 
-            font-weight: bold; 
-            background-color: #d4af37;
-            color: white;
+        .earnings-table .text-right {
+            text-align: right;
+        }
+        .totals {
+            float: right;
+            width: 300px;
+        }
+        .totals table {
+            width: 100%;
+        }
+        .totals td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        .totals .total-row {
+            font-weight: bold;
+            background-color: #f5f5f5;
+            font-size: 16px;
         }
         .footer {
-            margin-top: 40px;
+            margin-top: 50px;
             text-align: center;
             font-size: 12px;
             color: #666;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status.paid {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status.approved {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        .status.pending {
+            background-color: #fff3cd;
+            color: #856404;
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <div class="company-info">Huda Fashion</div>
-        <p>كشف راتب - {{ $payroll->period_start->format('Y-m-d') }} إلى {{ $payroll->period_end->format('Y-m-d') }}</p>
+        <h1>Huda Fashion ERP</h1>
+        <h2>PAYSLIP</h2>
     </div>
-    
+
     <div class="employee-info">
-        <p><strong>اسم الموظف:</strong> {{ $payroll->employee->user->name }}</p>
-        <p><strong>رقم الموظف:</strong> {{ $payroll->employee->employee_id }}</p>
-        <p><strong>المنصب:</strong> {{ $payroll->employee->position }}</p>
-        <p><strong>القسم:</strong> {{ $payroll->employee->department }}</p>
-    </div>
-    
-    <div class="salary-details">
-        <div class="salary-breakdown">
-            <h3>الراتب والمكافآت</h3>
-            <table>
-                <tr>
-                    <td>الراتب الأساسي</td>
-                    <td>{{ number_format($payroll->base_salary, 3) }} KWD</td>
-                </tr>
-                <tr>
-                    <td>ساعات الإضافي</td>
-                    <td>{{ number_format($payroll->overtime_hours, 2) }} ساعة</td>
-                </tr>
-                <tr>
-                    <td>مبلغ الإضافي</td>
-                    <td>{{ number_format($payroll->overtime_amount, 3) }} KWD</td>
-                </tr>
-                <tr>
-                    <td>المكافآت</td>
-                    <td>{{ number_format($payroll->bonuses, 3) }} KWD</td>
-                </tr>
-            </table>
+        <div class="employee-details">
+            <h3>Employee Information:</h3>
+            <p><strong>Name:</strong> {{ $payroll->employee->user->name }}</p>
+            <p><strong>Employee ID:</strong> {{ $payroll->employee->employee_id }}</p>
+            <p><strong>Position:</strong> {{ $payroll->employee->position }}</p>
+            <p><strong>Department:</strong> {{ $payroll->employee->department }}</p>
         </div>
         
-        <div class="deductions">
-            <h3>الخصومات</h3>
-            <table>
-                <tr>
-                    <td>الخصومات</td>
-                    <td>{{ number_format($payroll->deductions, 3) }} KWD</td>
-                </tr>
-            </table>
+        <div class="payroll-details">
+            <h3>Payroll Details:</h3>
+            <p><strong>Pay Period:</strong> {{ $payroll->period_start->format('M d, Y') }} - {{ $payroll->period_end->format('M d, Y') }}</p>
+            <p><strong>Payment Date:</strong> {{ $payroll->payment_date ? $payroll->payment_date->format('M d, Y') : 'Not paid yet' }}</p>
+            <p><strong>Status:</strong> 
+                <span class="status {{ $payroll->status }}">{{ ucfirst($payroll->status) }}</span>
+            </p>
+            <p><strong>Payment Method:</strong> {{ $payroll->payment_method ?? 'N/A' }}</p>
         </div>
     </div>
-    
-    <table>
+
+    <table class="earnings-table">
         <thead>
             <tr>
-                <th>الوصف</th>
-                <th>المبلغ</th>
+                <th>Description</th>
+                <th class="text-right">Amount (KWD)</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td>الراتب الأساسي</td>
-                <td>{{ number_format($payroll->base_salary, 3) }} KWD</td>
+                <td>Base Salary</td>
+                <td class="text-right">{{ number_format($payroll->base_salary, 3) }}</td>
             </tr>
+            @if($payroll->overtime_hours > 0)
             <tr>
-                <td>الإضافي</td>
-                <td>{{ number_format($payroll->overtime_amount, 3) }} KWD</td>
+                <td>Overtime ({{ $payroll->overtime_hours }} hours)</td>
+                <td class="text-right">{{ number_format($payroll->overtime_amount, 3) }}</td>
             </tr>
+            @endif
+            @if($payroll->bonuses > 0)
             <tr>
-                <td>المكافآت</td>
-                <td>{{ number_format($payroll->bonuses, 3) }} KWD</td>
+                <td>Bonuses</td>
+                <td class="text-right">{{ number_format($payroll->bonuses, 3) }}</td>
             </tr>
+            @endif
+            @if($payroll->deductions > 0)
             <tr>
-                <td>الخصومات</td>
-                <td>-{{ number_format($payroll->deductions, 3) }} KWD</td>
+                <td>Deductions</td>
+                <td class="text-right">-{{ number_format($payroll->deductions, 3) }}</td>
             </tr>
+            @endif
         </tbody>
-        <tfoot>
-            <tr class="total">
-                <td>الإجمالي</td>
-                <td>{{ number_format($payroll->total_amount, 3) }} KWD</td>
-            </tr>
-        </tfoot>
     </table>
-    
+
+    <div class="totals">
+        <table>
+            <tr class="total-row">
+                <td><strong>Net Pay:</strong></td>
+                <td class="text-right"><strong>{{ number_format($payroll->total_amount, 3) }} KWD</strong></td>
+            </tr>
+        </table>
+    </div>
+
+    <div style="clear: both;"></div>
+
+    @if($payroll->notes)
+    <div style="margin-top: 30px;">
+        <h3>Notes:</h3>
+        <p>{{ $payroll->notes }}</p>
+    </div>
+    @endif
+
     <div class="footer">
-        <p>تم إنشاء هذا الكشف في: {{ now()->format('Y-m-d H:i') }}</p>
-        <p>حالة الكشف: {{ ucfirst($payroll->status) }}</p>
+        <p>This payslip is computer generated and does not require a signature.</p>
+        <p>Huda Fashion ERP - Kuwait</p>
+        <p>Generated on {{ now()->format('M d, Y H:i') }}</p>
     </div>
 </body>
 </html>

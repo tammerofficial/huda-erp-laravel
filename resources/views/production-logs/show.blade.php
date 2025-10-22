@@ -2,201 +2,249 @@
 
 @section('content')
 <div class="container mx-auto p-6">
-    <div class="max-w-4xl mx-auto">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold text-gray-800">Production Log #{{ $productionLog->id }}</h1>
-            <div class="flex space-x-4">
-                <a href="{{ route('production-logs.edit', $productionLog) }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                    Edit
-                </a>
-                <a href="{{ route('production-logs.index') }}" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">
-                    Back to List
-                </a>
-            </div>
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold">📝 Production Log Details</h1>
+        <div class="flex gap-4">
+            <a href="{{ route('production-logs.index') }}" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">
+                Back to Production Logs
+            </a>
+            <a href="{{ route('production-logs.edit', $productionLog) }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                Edit
+            </a>
         </div>
+    </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Main Information -->
-            <div class="lg:col-span-2">
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-6">Production Details</h2>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Details -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-semibold mb-4">Production Log Information</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">Employee</label>
+                        <p class="text-lg font-semibold text-gray-900">
+                            {{ $productionLog->employee->user->name ?? 'N/A' }}
+                        </p>
+                        <p class="text-sm text-gray-600">{{ $productionLog->employee->position ?? 'N/A' }}</p>
+                    </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-600">Employee</label>
-                            <p class="mt-1 text-lg font-semibold text-gray-900">
-                                <a href="{{ route('employees.show', $productionLog->employee) }}" class="text-blue-600 hover:text-blue-800">
-                                    {{ $productionLog->employee->user->name }}
-                                </a>
-                            </p>
-                            <p class="text-sm text-gray-600">{{ $productionLog->employee->employee_id }}</p>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-600">Production Stage</label>
-                            <p class="mt-1 text-lg font-semibold text-gray-900">{{ $productionLog->productionStage->stage_name }}</p>
-                            <p class="text-sm text-gray-600">
-                                <a href="{{ route('productions.show', $productionLog->productionStage->productionOrder) }}" class="text-blue-600 hover:text-blue-800">
-                                    Order #{{ $productionLog->productionStage->productionOrder->id }}
-                                </a>
-                            </p>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-600">Product</label>
-                            <p class="mt-1 text-lg font-semibold text-gray-900">
-                                <a href="{{ route('products.show', $productionLog->product) }}" class="text-blue-600 hover:text-blue-800">
-                                    {{ $productionLog->product->name }}
-                                </a>
-                            </p>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-600">Pieces Completed</label>
-                            <p class="mt-1 text-lg font-semibold text-gray-900">{{ $productionLog->pieces_completed }} pieces</p>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-600">Start Time</label>
-                            <p class="mt-1 text-lg font-semibold text-gray-900">{{ $productionLog->start_time->format('Y-m-d H:i') }}</p>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-600">End Time</label>
-                            <p class="mt-1 text-lg font-semibold text-gray-900">
-                                {{ $productionLog->end_time ? $productionLog->end_time->format('Y-m-d H:i') : 'Not completed' }}
-                            </p>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">Production Stage</label>
+                        <p class="text-lg font-semibold text-gray-900">
+                            {{ $productionLog->productionStage->stage_name ?? 'N/A' }}
+                        </p>
+                        <p class="text-sm text-gray-600">Order #{{ $productionLog->productionStage->productionOrder->id ?? 'N/A' }}</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">Product</label>
+                        <p class="text-lg font-semibold text-gray-900">
+                            {{ $productionLog->product->name ?? 'N/A' }}
+                        </p>
+                        <p class="text-sm text-gray-600">SKU: {{ $productionLog->product->sku ?? 'N/A' }}</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">Quality Status</label>
+                        <div class="mt-1">
+                            @if($productionLog->quality_status === 'approved')
+                                <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800">
+                                    ✅ Approved
+                                </span>
+                            @elseif($productionLog->quality_status === 'rejected')
+                                <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full bg-red-100 text-red-800">
+                                    ❌ Rejected
+                                </span>
+                            @else
+                                <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                    ⏳ Pending
+                                </span>
+                            @endif
                         </div>
                     </div>
-                </div>
-
-                <!-- Performance Metrics -->
-                <div class="bg-white rounded-lg shadow-lg p-6 mt-6">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-6">Performance Metrics</h2>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="text-center">
-                            <div class="text-3xl font-bold text-blue-600">{{ $productionLog->duration_minutes ?? 'N/A' }}</div>
-                            <div class="text-sm text-gray-600">Duration (minutes)</div>
-                        </div>
-                        
-                        <div class="text-center">
-                            <div class="text-3xl font-bold text-green-600">{{ number_format($productionLog->earnings, 3) }} KWD</div>
-                            <div class="text-sm text-gray-600">Earnings</div>
-                        </div>
-                        
-                        <div class="text-center">
-                            <div class="text-3xl font-bold text-purple-600">
-                                {{ $productionLog->efficiency_rate ? number_format($productionLog->efficiency_rate, 1) . '%' : 'N/A' }}
-                            </div>
-                            <div class="text-sm text-gray-600">Efficiency Rate</div>
-                        </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">Start Time</label>
+                        <p class="text-lg font-semibold text-gray-900">
+                            {{ $productionLog->start_time->format('M d, Y H:i') }}
+                        </p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">End Time</label>
+                        <p class="text-lg font-semibold text-gray-900">
+                            {{ $productionLog->end_time ? $productionLog->end_time->format('M d, Y H:i') : 'Not completed' }}
+                        </p>
                     </div>
                 </div>
+            </div>
 
-                <!-- Notes -->
-                @if($productionLog->notes)
-                <div class="bg-white rounded-lg shadow-lg p-6 mt-6">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-6">Notes</h2>
-                    <p class="text-gray-900">{{ $productionLog->notes }}</p>
+            <!-- Production Metrics -->
+            <div class="bg-white rounded-lg shadow p-6 mt-6">
+                <h2 class="text-xl font-semibold mb-4">Production Metrics</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-blue-600">{{ $productionLog->pieces_completed }}</div>
+                        <div class="text-sm text-gray-500">Pieces Completed</div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-green-600">{{ $productionLog->rate_per_piece ?? 0 }} KWD</div>
+                        <div class="text-sm text-gray-500">Rate Per Piece</div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-purple-600">{{ $productionLog->earnings ?? 0 }} KWD</div>
+                        <div class="text-sm text-gray-500">Total Earnings</div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-orange-600">{{ $productionLog->duration_minutes ?? 0 }} min</div>
+                        <div class="text-sm text-gray-500">Duration</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Efficiency Analysis -->
+            @if($productionLog->expected_duration && $productionLog->duration_minutes)
+            <div class="bg-white rounded-lg shadow p-6 mt-6">
+                <h2 class="text-xl font-semibold mb-4">Efficiency Analysis</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-blue-600">{{ $productionLog->expected_duration }} min</div>
+                        <div class="text-sm text-gray-500">Expected Duration</div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-green-600">{{ $productionLog->duration_minutes }} min</div>
+                        <div class="text-sm text-gray-500">Actual Duration</div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="text-3xl font-bold {{ $productionLog->efficiency_rate > 100 ? 'text-green-600' : 'text-red-600' }}">
+                            {{ $productionLog->efficiency_rate ?? 0 }}%
+                        </div>
+                        <div class="text-sm text-gray-500">Efficiency Rate</div>
+                    </div>
+                </div>
+                
+                @if($productionLog->efficiency_rate > 100)
+                <div class="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="text-green-800 font-semibold">Excellent performance! Completed faster than expected.</span>
+                    </div>
+                </div>
+                @elseif($productionLog->efficiency_rate < 80)
+                <div class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                        <span class="text-red-800 font-semibold">Performance below expectations. Consider training or support.</span>
+                    </div>
                 </div>
                 @endif
             </div>
+            @endif
 
-            <!-- Status Card -->
-            <div class="lg:col-span-1">
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-6">Status</h2>
+            <!-- Notes -->
+            @if($productionLog->notes)
+            <div class="bg-white rounded-lg shadow p-6 mt-6">
+                <h2 class="text-xl font-semibold mb-4">Notes</h2>
+                <p class="text-gray-700">{{ $productionLog->notes }}</p>
+            </div>
+            @endif
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Quick Actions -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold mb-4">Quick Actions</h3>
+                <div class="space-y-3">
+                    <a href="{{ route('production-logs.edit', $productionLog) }}" 
+                       class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-center block">
+                        Edit Production Log
+                    </a>
                     
-                    <div class="text-center">
-                        @if($productionLog->quality_status === 'approved')
-                        <div class="text-6xl text-green-600 mb-4">✅</div>
-                        <div class="text-2xl font-bold text-green-600 mb-2">Approved</div>
-                        <div class="text-sm text-gray-600">Quality approved</div>
-                        @elseif($productionLog->quality_status === 'rejected')
-                        <div class="text-6xl text-red-600 mb-4">❌</div>
-                        <div class="text-2xl font-bold text-red-600 mb-2">Rejected</div>
-                        <div class="text-sm text-gray-600">Quality rejected</div>
-                        @else
-                        <div class="text-6xl text-yellow-600 mb-4">⏳</div>
-                        <div class="text-2xl font-bold text-yellow-600 mb-2">Pending</div>
-                        <div class="text-sm text-gray-600">Awaiting quality check</div>
-                        @endif
-                    </div>
+                    @if($productionLog->quality_status === 'pending')
+                    <form action="{{ route('production-logs.approve', $productionLog) }}" method="POST" class="inline w-full">
+                        @csrf
+                        <button type="submit" class="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                            Approve Quality
+                        </button>
+                    </form>
                     
-                    <div class="mt-6 pt-6 border-t border-gray-200">
-                        <div class="text-sm text-gray-600">
-                            <div class="flex justify-between mb-2">
-                                <span>Created:</span>
-                                <span>{{ $productionLog->created_at->format('Y-m-d H:i') }}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>Updated:</span>
-                                <span>{{ $productionLog->updated_at->format('Y-m-d H:i') }}</span>
-                            </div>
-                        </div>
-                    </div>
+                    <form action="{{ route('production-logs.reject', $productionLog) }}" method="POST" class="inline w-full">
+                        @csrf
+                        <button type="submit" class="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+                            Reject Quality
+                        </button>
+                    </form>
+                    @endif
+                    
+                    <form action="{{ route('production-logs.destroy', $productionLog) }}" method="POST" 
+                          onsubmit="return confirm('Are you sure you want to delete this production log?')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+                            Delete Production Log
+                        </button>
+                    </form>
                 </div>
+            </div>
 
-                <!-- Production Summary -->
-                <div class="bg-white rounded-lg shadow-lg p-6 mt-6">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-6">Production Summary</h2>
-                    
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-600">Rate per piece:</span>
-                            <span class="font-semibold text-gray-900">{{ number_format($productionLog->rate_per_piece, 3) }} KWD</span>
-                        </div>
-                        
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-600">Pieces completed:</span>
-                            <span class="font-semibold text-gray-900">{{ $productionLog->pieces_completed }}</span>
-                        </div>
-                        
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-600">Expected duration:</span>
-                            <span class="font-semibold text-gray-900">{{ $productionLog->expected_duration ?? 'N/A' }} min</span>
-                        </div>
-                        
-                        <div class="flex justify-between items-center pt-4 border-t border-gray-200">
-                            <span class="text-gray-600 font-semibold">Total earnings:</span>
-                            <span class="font-bold text-lg text-gray-900">{{ number_format($productionLog->earnings, 3) }} KWD</span>
-                        </div>
+            <!-- Employee Info -->
+            @if($productionLog->employee)
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold mb-4">Employee</h3>
+                <div class="space-y-2">
+                    <div>
+                        <span class="text-sm text-gray-500">Name:</span>
+                        <span class="font-semibold">{{ $productionLog->employee->user->name }}</span>
                     </div>
-                </div>
-
-                <!-- Actions -->
-                <div class="bg-white rounded-lg shadow-lg p-6 mt-6">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-6">Actions</h2>
-                    
-                    <div class="space-y-3">
-                        @if($productionLog->quality_status === 'pending')
-                        <form action="{{ route('production-logs.approve', $productionLog) }}" method="POST" class="inline">
-                            @csrf
-                            <button type="submit" class="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
-                                Approve Quality
-                            </button>
-                        </form>
-                        
-                        <form action="{{ route('production-logs.reject', $productionLog) }}" method="POST" class="inline">
-                            @csrf
-                            <button type="submit" class="w-full bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">
-                                Reject Quality
-                            </button>
-                        </form>
-                        @endif
-                        
-                        @if(!$productionLog->end_time)
-                        <form action="{{ route('production-logs.complete', $productionLog) }}" method="POST" class="inline">
-                            @csrf
-                            <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-                                Complete Production
-                            </button>
-                        </form>
-                        @endif
+                    <div>
+                        <span class="text-sm text-gray-500">Position:</span>
+                        <span class="font-semibold">{{ $productionLog->employee->position }}</span>
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-500">Department:</span>
+                        <span class="font-semibold">{{ $productionLog->employee->department }}</span>
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-500">Efficiency Rating:</span>
+                        <span class="font-semibold">{{ $productionLog->employee->efficiency_rating ?? 'N/A' }}</span>
                     </div>
                 </div>
             </div>
+            @endif
+
+            <!-- Production Stage Info -->
+            @if($productionLog->productionStage)
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold mb-4">Production Stage</h3>
+                <div class="space-y-2">
+                    <div>
+                        <span class="text-sm text-gray-500">Stage:</span>
+                        <span class="font-semibold">{{ $productionLog->productionStage->stage_name }}</span>
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-500">Status:</span>
+                        <span class="font-semibold">{{ ucfirst($productionLog->productionStage->status) }}</span>
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-500">Sequence:</span>
+                        <span class="font-semibold">{{ $productionLog->productionStage->sequence_order }}</span>
+                    </div>
+                </div>
+            </div>
+            @endif
         </div>
     </div>
 </div>
