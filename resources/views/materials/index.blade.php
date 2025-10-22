@@ -12,9 +12,8 @@
                 <h2 class="text-2xl font-bold text-gray-900">🧱 Materials Management</h2>
                 <p class="text-gray-600 mt-1">Manage your material inventory efficiently</p>
             </div>
-            <a href="{{ route('materials.create') }}" 
-               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition-colors">
-                <i class="fas fa-plus mr-2"></i>
+            <a href="{{ route('materials.create') }}" class="btn-primary">
+                <i class="fas fa-plus"></i>
                 Add New Material
             </a>
         </div>

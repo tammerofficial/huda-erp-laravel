@@ -55,14 +55,17 @@ class SyncWooCommerceCommand extends Command
         $this->info('Syncing customers...');
         
         $response = Http::withBasicAuth($this->consumerKey, $this->consumerSecret)
-            ->timeout(30)
+            ->withOptions(['verify' => false]) // Disable SSL verification if needed
+            ->timeout(60)
             ->get($this->storeUrl . 'wp-json/wc/v3/customers', [
-                'per_page' => 10,
+                'per_page' => 20,
                 'orderby' => 'date',
                 'order' => 'desc'
             ]);
 
         if (!$response->successful()) {
+            $this->error("Response status: {$response->status()}");
+            $this->error("Response body: " . $response->body());
             throw new \Exception('Failed to fetch customers from WooCommerce');
         }
 
@@ -73,12 +76,15 @@ class SyncWooCommerceCommand extends Command
             try {
                 $this->createOrUpdateCustomer($wooCustomer);
                 $syncedCount++;
+                $this->info("✓ Synced customer: {$wooCustomer['email']}");
+                sleep(2); // 2 second delay
             } catch (\Exception $e) {
+                $this->error("✗ Failed customer {$wooCustomer['id']}: " . $e->getMessage());
                 Log::error("Failed to sync customer {$wooCustomer['id']}: " . $e->getMessage());
             }
         }
 
-        $this->info("Synced {$syncedCount} customers");
+        $this->info("✅ Synced {$syncedCount} customers");
     }
 
     protected function syncProducts()
@@ -86,15 +92,17 @@ class SyncWooCommerceCommand extends Command
         $this->info('Syncing products...');
         
         $response = Http::withBasicAuth($this->consumerKey, $this->consumerSecret)
-            ->timeout(30)
+            ->withOptions(['verify' => false])
+            ->timeout(60)
             ->get($this->storeUrl . 'wp-json/wc/v3/products', [
-                'per_page' => 10,
+                'per_page' => 20,
                 'status' => 'publish',
                 'orderby' => 'date',
                 'order' => 'desc'
             ]);
 
         if (!$response->successful()) {
+            $this->error("Response status: {$response->status()}");
             throw new \Exception('Failed to fetch products from WooCommerce');
         }
 
@@ -105,12 +113,15 @@ class SyncWooCommerceCommand extends Command
             try {
                 $this->createOrUpdateProduct($wooProduct);
                 $syncedCount++;
+                $this->info("✓ Synced product: {$wooProduct['name']}");
+                sleep(2); // 2 second delay
             } catch (\Exception $e) {
+                $this->error("✗ Failed product {$wooProduct['id']}: " . $e->getMessage());
                 Log::error("Failed to sync product {$wooProduct['id']}: " . $e->getMessage());
             }
         }
 
-        $this->info("Synced {$syncedCount} products");
+        $this->info("✅ Synced {$syncedCount} products");
     }
 
     protected function syncOrders()
@@ -120,7 +131,7 @@ class SyncWooCommerceCommand extends Command
         $response = Http::withBasicAuth($this->consumerKey, $this->consumerSecret)
             ->timeout(30)
             ->get($this->storeUrl . 'wp-json/wc/v3/orders', [
-                'per_page' => 10,
+                'per_page' => 20,
                 'status' => 'any',
                 'orderby' => 'date',
                 'order' => 'desc'
@@ -137,6 +148,8 @@ class SyncWooCommerceCommand extends Command
             try {
                 $this->createOrUpdateOrder($wooOrder);
                 $syncedCount++;
+                $this->info("Synced order: #{$wooOrder['number']}");
+                sleep(2); // 2 second delay
             } catch (\Exception $e) {
                 Log::error("Failed to sync order {$wooOrder['id']}: " . $e->getMessage());
             }
@@ -177,30 +190,40 @@ class SyncWooCommerceCommand extends Command
     {
         $existingProduct = Product::where('woo_id', $wooProduct['id'])->first();
         
-        if ($existingProduct) {
-            $existingProduct->update([
-                'name' => $wooProduct['name'],
-                'price' => $wooProduct['price'],
-                'description' => $wooProduct['description'],
-                'is_active' => $wooProduct['status'] === 'publish',
-                'stock_quantity' => $wooProduct['stock_quantity'] ?? $existingProduct->stock_quantity,
-            ]);
-            return $existingProduct;
-        }
-
-        return Product::create([
+        $productData = [
             'name' => $wooProduct['name'],
-            'sku' => $wooProduct['sku'] ?: 'WOO-' . $wooProduct['id'],
-            'description' => $wooProduct['description'],
             'price' => $wooProduct['price'],
-            'category' => $wooProduct['categories'][0]['name'] ?? null,
-            'image_url' => $wooProduct['images'][0]['src'] ?? null,
-            'woo_id' => $wooProduct['id'],
-            'product_type' => 'standard',
+            'description' => $wooProduct['description'],
             'is_active' => $wooProduct['status'] === 'publish',
             'stock_quantity' => $wooProduct['stock_quantity'] ?? 0,
-            'unit' => 'piece',
-        ]);
+            'weight' => $wooProduct['weight'] ?? null,
+            'image_url' => $wooProduct['images'][0]['src'] ?? null,
+        ];
+
+        if ($existingProduct) {
+            $existingProduct->update($productData);
+            $product = $existingProduct;
+        } else {
+            $product = Product::create(array_merge($productData, [
+                'sku' => $wooProduct['sku'] ?: 'WOO-' . $wooProduct['id'],
+                'category' => $wooProduct['categories'][0]['name'] ?? null,
+                'woo_id' => $wooProduct['id'],
+                'product_type' => 'standard',
+                'unit' => 'piece',
+            ]));
+        }
+
+        // Update product cost if BOM exists
+        try {
+            $costCalculator = app(\App\Services\ProductCostCalculator::class);
+            if ($product->billOfMaterials()->where('is_default', true)->exists()) {
+                $costCalculator->updateProductCost($product);
+            }
+        } catch (\Exception $e) {
+            Log::warning("Failed to calculate cost for product {$product->id}: " . $e->getMessage());
+        }
+
+        return $product;
     }
 
     protected function createOrUpdateOrder($wooOrder)
@@ -212,11 +235,21 @@ class SyncWooCommerceCommand extends Command
                 'status' => $this->mapWooCommerceStatus($wooOrder['status']),
                 'payment_status' => $this->mapWooCommercePaymentStatus($wooOrder['status']),
             ]);
-            return $existingOrder;
+            
+            // Recalculate costs if order is updated
+            $this->processOrderCosts($existingOrder, $wooOrder);
+            
+            return $existingOrder->fresh();
         }
 
         // Create customer if not exists
         $customer = $this->createOrUpdateCustomerFromBilling($wooOrder['billing']);
+
+        // Extract analytics data from meta_data
+        $utmSource = $this->extractMetaValue($wooOrder['meta_data'] ?? [], 'utm_source');
+        $utmMedium = $this->extractMetaValue($wooOrder['meta_data'] ?? [], 'utm_medium');
+        $utmCampaign = $this->extractMetaValue($wooOrder['meta_data'] ?? [], 'utm_campaign');
+        $referrer = $this->extractMetaValue($wooOrder['meta_data'] ?? [], '_wp_http_referer');
 
         // Create order
         $order = Order::create([
@@ -229,12 +262,17 @@ class SyncWooCommerceCommand extends Command
             'final_amount' => $wooOrder['total'],
             'status' => $this->mapWooCommerceStatus($wooOrder['status']),
             'payment_status' => $this->mapWooCommercePaymentStatus($wooOrder['status']),
-            // Map to allowed enum: ['cash','credit','bank_transfer','card']
             'payment_type' => $this->mapWooCommercePaymentMethod($wooOrder['payment_method'] ?? ''),
             'woo_id' => $wooOrder['id'],
             'delivery_date' => $wooOrder['date_completed'],
             'shipping_address' => $this->formatAddress($wooOrder['shipping']),
+            'shipping_country' => $wooOrder['shipping']['country'] ?? 'KW',
             'created_by' => 1, // System user
+            // Analytics fields
+            'utm_source' => $utmSource,
+            'utm_medium' => $utmMedium,
+            'utm_campaign' => $utmCampaign,
+            'referrer' => $referrer,
         ]);
 
         // Create order items
@@ -250,7 +288,10 @@ class SyncWooCommerceCommand extends Command
             ]);
         }
 
-        return $order;
+        // Process costs and shipping
+        $this->processOrderCosts($order, $wooOrder);
+
+        return $order->fresh();
     }
 
     protected function mapWooCommercePaymentMethod(string $method): ?string
@@ -352,5 +393,66 @@ class SyncWooCommerceCommand extends Command
         ]);
         
         return implode(', ', $parts);
+    }
+
+    /**
+     * Process order costs - calculate material, labor, overhead, and shipping
+     */
+    protected function processOrderCosts(Order $order, array $wooOrder)
+    {
+        try {
+            $costCalculator = app(\App\Services\ProductCostCalculator::class);
+            $shippingCalculator = app(\App\Services\ShippingCalculator::class);
+
+            // Reload order with items
+            $order->load('orderItems.product');
+
+            // Calculate product costs
+            $orderItems = $order->orderItems->map(function ($item) {
+                return [
+                    'product_id' => $item->product_id,
+                    'quantity' => $item->quantity,
+                ];
+            })->toArray();
+
+            $costs = $costCalculator->calculateOrderCosts($orderItems);
+
+            // Calculate shipping
+            $shipping = $shippingCalculator->calculateOrderShipping($order);
+
+            // Calculate profit margin
+            $totalCost = $costs['total_cost'] + $shipping['shipping_cost'];
+            $profitMargin = $order->final_amount > 0 
+                ? (($order->final_amount - $totalCost) / $order->final_amount) * 100 
+                : 0;
+
+            $order->update([
+                'material_cost' => $costs['material_cost'],
+                'labor_cost' => $costs['labor_cost'],
+                'overhead_cost' => $costs['overhead_cost'],
+                'total_cost' => $totalCost,
+                'shipping_cost' => $shipping['shipping_cost'],
+                'shipping_country' => $shipping['shipping_country'],
+                'order_weight' => $shipping['order_weight'],
+                'profit_margin' => round($profitMargin, 2),
+            ]);
+
+            Log::info("Costs calculated for Order #{$order->order_number}: Total Cost = {$totalCost} KWD, Profit Margin = {$profitMargin}%");
+        } catch (\Exception $e) {
+            Log::error("Failed to calculate costs for Order #{$order->order_number}: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Extract meta value from WooCommerce meta_data array
+     */
+    protected function extractMetaValue(array $metaData, string $key): ?string
+    {
+        foreach ($metaData as $meta) {
+            if (isset($meta['key']) && $meta['key'] === $key) {
+                return $meta['value'] ?? null;
+            }
+        }
+        return null;
     }
 }

@@ -46,6 +46,7 @@ class ProductController extends Controller
             'version' => $request->version,
             'description' => $request->description,
             'status' => 'draft',
+            'created_by' => auth()->id() ?? 1,
         ]);
 
         $totalCost = 0;
@@ -65,7 +66,40 @@ class ProductController extends Controller
         }
 
         $bom->update(['total_cost' => $totalCost]);
+        
+        // Recalculate product cost if this is the default BOM
+        if ($bom->is_default) {
+            $product->calculateCost();
+        }
+        
         return redirect()->route('products.show', $product)->with('success', 'BOM created successfully');
+    }
+
+    /**
+     * Calculate product cost
+     */
+    public function calculateCost(Product $product)
+    {
+        try {
+            $product->calculateCost();
+            return back()->with('success', 'Product cost calculated successfully');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to calculate cost: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Update product pricing based on cost
+     */
+    public function updatePricing(Request $request, Product $product)
+    {
+        $request->validate([
+            'price' => 'required|numeric|min:0',
+        ]);
+
+        $product->update(['price' => $request->price]);
+
+        return back()->with('success', 'Product pricing updated successfully');
     }
 
 }

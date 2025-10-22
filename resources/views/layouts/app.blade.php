@@ -183,7 +183,7 @@
 
         <!-- Page Content -->
         <main class="relative z-0" style="background: #f8f8f8;">
-            <div class="container-wrapper px-4 sm:px-6 lg:px-8 py-8">
+            <div class="container-wrapper">
                 <div class="p-4 md:p-6">
             @if(session('success'))
                 <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"

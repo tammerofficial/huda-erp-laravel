@@ -42,6 +42,8 @@ Route::resource('suppliers', SupplierController::class);
 Route::resource('products', ProductController::class);
 Route::get('products/{product}/bom/create', [ProductController::class, 'createBOM'])->name('products.bom.create');
 Route::post('products/{product}/bom', [ProductController::class, 'storeBOM'])->name('products.bom.store');
+Route::post('products/{product}/calculate-cost', [ProductController::class, 'calculateCost'])->name('products.calculate-cost');
+Route::post('products/{product}/update-pricing', [ProductController::class, 'updatePricing'])->name('products.update-pricing');
 
 // Material Routes
 Route::resource('materials', MaterialController::class);
@@ -50,6 +52,8 @@ Route::post('materials/{material}/adjust-inventory', [MaterialController::class,
 // Order Routes
 Route::resource('orders', OrderController::class);
 Route::post('orders/sync-woocommerce', [OrderController::class, 'syncFromWooCommerce'])->name('orders.sync-woocommerce');
+Route::post('orders/{order}/recalculate-costs', [OrderController::class, 'recalculateCosts'])->name('orders.recalculate-costs');
+Route::get('orders/{order}/cost-breakdown', [OrderController::class, 'costBreakdown'])->name('orders.cost-breakdown');
 
 // Invoice Routes
 Route::resource('invoices', InvoiceController::class);
@@ -93,6 +97,22 @@ Route::get('reports/inventory', function () {
 Route::get('reports/production', function () {
     return view('reports.production');
 })->name('reports.production');
+
+Route::get('reports/profitability', function () {
+    $startDate = request('start_date', now()->startOfMonth());
+    $endDate = request('end_date', now()->endOfMonth());
+    
+    $accountingService = app(\App\Services\AccountingService::class);
+    $summary = $accountingService->getAccountingSummary($startDate, $endDate);
+    
+    $profitableOrders = \App\Models\Order::profitable()
+        ->whereBetween('order_date', [$startDate, $endDate])
+        ->with('customer')
+        ->orderBy('profit_margin', 'desc')
+        ->get();
+    
+    return view('reports.profitability', compact('summary', 'profitableOrders', 'startDate', 'endDate'));
+})->name('reports.profitability');
 
 // Settings Routes
 Route::get('settings', [SettingsController::class, 'index'])->name('settings');

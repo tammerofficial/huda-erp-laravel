@@ -12,10 +12,10 @@
                 <h2 class="text-2xl font-bold text-gray-900">🛒 Orders Management</h2>
                 <p class="text-gray-600 mt-1">Manage customer orders efficiently</p>
             </div>
-            <div class="text-sm text-gray-500">
-                <i class="fas fa-info-circle mr-1"></i>
-                Orders are synced automatically from huda website every 5 minutes
-            </div>
+            <a href="{{ route('orders.create') }}" class="btn-primary">
+                <i class="fas fa-plus"></i>
+                Create New Order
+            </a>
         </div>
     </div>
 

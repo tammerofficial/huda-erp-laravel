@@ -196,23 +196,23 @@
 <div class="px-6 py-6" style="max-width: 100%; margin: 0 auto;">
     <!-- Welcome Banner -->
     <div class="welcome-banner">
-        <div class="row align-items-center">
-            <div class="col-md-8">
+        <div class="flex items-center justify-between">
+            <div>
                 <h1>Welcome back, {{ auth()->user()->name ?? 'User' }}! 👋</h1>
                 <p class="mb-0">Here's what's happening with your business today.</p>
             </div>
-            <div class="col-md-4 text-md-end">
+            <div>
                 <span class="text-white-50">{{ now()->format('l, F j, Y') }}</span>
             </div>
         </div>
     </div>
 
     <!-- Statistics Cards -->
-    <div class="row g-3 mb-3">
-        <div class="col-lg-3 col-md-6 col-sm-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
+        <div>
             <div class="stat-card">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div class="flex-grow-1">
+                <div class="flex justify-between items-start">
+                    <div class="flex-grow">
                         <div class="stat-label">Total Orders</div>
                         <div class="stat-number">{{ $stats['total_orders'] ?? 0 }}</div>
                         <small class="text-white-50" style="font-size: 0.75rem;">
@@ -226,10 +226,10 @@
             </div>
         </div>
 
-        <div class="col-lg-3 col-md-6 col-sm-6">
+        <div>
             <div class="stat-card gold-accent">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div class="flex-grow-1">
+                <div class="flex justify-between items-start">
+                    <div class="flex-grow">
                         <div class="stat-label">Total Revenue</div>
                         <div class="stat-number">{{ number_format($stats['total_revenue'] ?? 0, 0) }}</div>
                         <small style="opacity: 0.7; font-size: 0.75rem;">
@@ -243,10 +243,10 @@
             </div>
         </div>
 
-        <div class="col-lg-3 col-md-6 col-sm-6">
+        <div>
             <div class="stat-card">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div class="flex-grow-1">
+                <div class="flex justify-between items-start">
+                    <div class="flex-grow">
                         <div class="stat-label">Pending Orders</div>
                         <div class="stat-number">{{ $stats['pending_orders'] ?? 0 }}</div>
                         <small class="text-white-50" style="font-size: 0.75rem;">
@@ -260,10 +260,10 @@
             </div>
         </div>
 
-        <div class="col-lg-3 col-md-6 col-sm-6">
+        <div>
             <div class="stat-card">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div class="flex-grow-1">
+                <div class="flex justify-between items-start">
+                    <div class="flex-grow">
                         <div class="stat-label">Customers</div>
                         <div class="stat-number">{{ $stats['total_customers'] ?? 0 }}</div>
                         <small class="text-white-50" style="font-size: 0.75rem;">
@@ -278,17 +278,17 @@
         </div>
     </div>
 
-    <div class="row g-3">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
         <!-- Recent Orders -->
-        <div class="col-lg-8">
+        <div class="lg:col-span-2">
             <div class="luxury-card">
-                <div class="p-4 border-bottom">
+                <div class="p-4 border-b border-gray-200">
                     <h3 class="section-title mb-0">Recent Orders</h3>
                 </div>
                 <div class="p-4">
                     @if(isset($recent_orders) && $recent_orders->count() > 0)
-                        <div class="table-responsive">
-                            <table class="luxury-table table table-hover mb-0">
+                        <div class="overflow-x-auto">
+                            <table class="luxury-table w-full mb-0">
                                 <thead>
                                     <tr>
                                         <th>Order #</th>
@@ -316,8 +316,8 @@
                             </table>
                         </div>
                     @else
-                        <div class="text-center py-5 text-muted">
-                            <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
+                        <div class="text-center py-5 text-gray-500">
+                            <i class="fas fa-inbox text-5xl mb-3 block"></i>
                             No recent orders
                         </div>
                     @endif
@@ -326,9 +326,9 @@
         </div>
 
         <!-- Quick Stats -->
-        <div class="col-lg-4">
+        <div class="lg:col-span-1">
             <div class="luxury-card">
-                <div class="p-4 border-bottom">
+                <div class="p-4 border-b border-gray-200">
                     <h3 class="section-title mb-0">Quick Stats</h3>
                 </div>
                 <div class="p-4">
@@ -367,47 +367,35 @@
 
     <!-- Quick Actions -->
     <div class="luxury-card mt-4">
-        <div class="p-4 border-bottom">
+        <div class="p-4 border-b border-gray-200">
             <h3 class="section-title mb-0">Quick Actions</h3>
         </div>
         <div class="p-4">
-            <div class="row g-3">
-                <div class="col-md-2 col-6">
-                    <a href="{{ route('orders.create') }}" class="action-btn text-decoration-none d-block">
-                        <i class="fas fa-plus-circle"></i>
-                        <div class="small font-weight-bold text-dark">New Order</div>
-                    </a>
-                </div>
-                <div class="col-md-2 col-6">
-                    <a href="{{ route('customers.create') }}" class="action-btn text-decoration-none d-block">
-                        <i class="fas fa-user-plus"></i>
-                        <div class="small font-weight-bold text-dark">Add Customer</div>
-                    </a>
-                </div>
-                <div class="col-md-2 col-6">
-                    <a href="{{ route('products.create') }}" class="action-btn text-decoration-none d-block">
-                        <i class="fas fa-box"></i>
-                        <div class="small font-weight-bold text-dark">Add Product</div>
-                    </a>
-                </div>
-                <div class="col-md-2 col-6">
-                    <a href="{{ route('materials.create') }}" class="action-btn text-decoration-none d-block">
-                        <i class="fas fa-cube"></i>
-                        <div class="small font-weight-bold text-dark">Add Material</div>
-                    </a>
-                </div>
-                <div class="col-md-2 col-6">
-                    <a href="{{ route('suppliers.create') }}" class="action-btn text-decoration-none d-block">
-                        <i class="fas fa-industry"></i>
-                        <div class="small font-weight-bold text-dark">Add Supplier</div>
-                    </a>
-                </div>
-                <div class="col-md-2 col-6">
-                    <a href="{{ route('employees.create') }}" class="action-btn text-decoration-none d-block">
-                        <i class="fas fa-user-tie"></i>
-                        <div class="small font-weight-bold text-dark">Add Employee</div>
-                    </a>
-                </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                <a href="{{ route('orders.create') }}" class="action-btn no-underline block">
+                    <i class="fas fa-plus-circle"></i>
+                    <div class="text-sm font-semibold text-gray-800">New Order</div>
+                </a>
+                <a href="{{ route('customers.create') }}" class="action-btn no-underline block">
+                    <i class="fas fa-user-plus"></i>
+                    <div class="text-sm font-semibold text-gray-800">Add Customer</div>
+                </a>
+                <a href="{{ route('products.create') }}" class="action-btn no-underline block">
+                    <i class="fas fa-box"></i>
+                    <div class="text-sm font-semibold text-gray-800">Add Product</div>
+                </a>
+                <a href="{{ route('materials.create') }}" class="action-btn no-underline block">
+                    <i class="fas fa-cube"></i>
+                    <div class="text-sm font-semibold text-gray-800">Add Material</div>
+                </a>
+                <a href="{{ route('suppliers.create') }}" class="action-btn no-underline block">
+                    <i class="fas fa-industry"></i>
+                    <div class="text-sm font-semibold text-gray-800">Add Supplier</div>
+                </a>
+                <a href="{{ route('employees.create') }}" class="action-btn no-underline block">
+                    <i class="fas fa-user-tie"></i>
+                    <div class="text-sm font-semibold text-gray-800">Add Employee</div>
+                </a>
             </div>
         </div>
     </div>
@@ -415,16 +403,16 @@
     @if(isset($production_orders) && $production_orders->count() > 0)
     <!-- Production Orders -->
     <div class="luxury-card mt-4">
-        <div class="p-4 border-bottom">
+        <div class="p-4 border-b border-gray-200">
             <h3 class="section-title mb-0">Active Production</h3>
         </div>
         <div class="p-4">
             @foreach($production_orders as $production)
             <div class="mb-3">
-                <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="flex justify-between items-center mb-2">
                     <div>
-                        <strong class="d-block">{{ $production->product->name ?? 'N/A' }}</strong>
-                        <small class="text-muted">Order #{{ $production->order_id ?? 'N/A' }}</small>
+                        <strong class="block">{{ $production->product->name ?? 'N/A' }}</strong>
+                        <small class="text-gray-500">Order #{{ $production->order_id ?? 'N/A' }}</small>
                     </div>
                     <span class="badge-luxury success">In Progress</span>
                 </div>
