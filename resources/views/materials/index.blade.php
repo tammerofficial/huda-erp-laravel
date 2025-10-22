@@ -12,10 +12,16 @@
                 <h2 class="text-2xl font-bold text-gray-900">🧱 Materials Management</h2>
                 <p class="text-gray-600 mt-1">Manage your material inventory efficiently</p>
             </div>
-            <a href="{{ route('materials.create') }}" class="btn-primary">
-                <i class="fas fa-plus"></i>
-                Add New Material
-            </a>
+            <div class="flex space-x-3">
+                <a href="{{ route('materials.low-stock') }}" class="inline-flex items-center px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    Low Stock Alert
+                </a>
+                <a href="{{ route('materials.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition">
+                    <i class="fas fa-plus mr-2"></i>
+                    Add New Material
+                </a>
+            </div>
         </div>
     </div>
 
@@ -112,8 +118,26 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {{ $material->supplier->name ?? 'N/A' }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {{ $material->stock_quantity ?? 0 }}
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            @php
+                                $totalStock = $material->available_quantity;
+                                $isLowStock = $material->isLowStock();
+                            @endphp
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm font-semibold {{ $isLowStock ? 'text-red-600' : 'text-gray-900' }}">
+                                    {{ $totalStock }} {{ $material->unit }}
+                                </span>
+                                @if($isLowStock)
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                                        <i class="fas fa-exclamation-triangle"></i> Low
+                                    </span>
+                                @endif
+                            </div>
+                            @if($material->reorder_level)
+                                <div class="text-xs text-gray-500 mt-1">
+                                    Min: {{ $material->min_stock_level ?? $material->reorder_level }}
+                                </div>
+                            @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             @if($material->is_active)

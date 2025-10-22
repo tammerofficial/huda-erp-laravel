@@ -59,7 +59,7 @@ class SyncWooCommerceCommand extends Command
             ->timeout(60)
             ->get($this->storeUrl . 'wp-json/wc/v3/customers', [
                 'per_page' => 20,
-                'orderby' => 'date',
+                'orderby' => 'registered_date',
                 'order' => 'desc'
             ]);
 
@@ -129,15 +129,17 @@ class SyncWooCommerceCommand extends Command
         $this->info('Syncing orders...');
         
         $response = Http::withBasicAuth($this->consumerKey, $this->consumerSecret)
-            ->timeout(30)
+            ->withOptions(['verify' => false])
+            ->timeout(60)
             ->get($this->storeUrl . 'wp-json/wc/v3/orders', [
                 'per_page' => 20,
-                'status' => 'any',
+                'status' => 'on-hold', // Only sync on-hold orders
                 'orderby' => 'date',
                 'order' => 'desc'
             ]);
 
         if (!$response->successful()) {
+            $this->error("Response status: {$response->status()}");
             throw new \Exception('Failed to fetch orders from WooCommerce');
         }
 
@@ -148,14 +150,15 @@ class SyncWooCommerceCommand extends Command
             try {
                 $this->createOrUpdateOrder($wooOrder);
                 $syncedCount++;
-                $this->info("Synced order: #{$wooOrder['number']}");
+                $this->info("✓ Synced order: #{$wooOrder['number']} (On-Hold)");
                 sleep(2); // 2 second delay
             } catch (\Exception $e) {
+                $this->error("✗ Failed order {$wooOrder['id']}: " . $e->getMessage());
                 Log::error("Failed to sync order {$wooOrder['id']}: " . $e->getMessage());
             }
         }
 
-        $this->info("Synced {$syncedCount} orders");
+        $this->info("✅ Synced {$syncedCount} on-hold orders");
     }
 
     protected function createOrUpdateCustomer($wooCustomer)

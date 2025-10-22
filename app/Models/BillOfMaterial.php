@@ -33,7 +33,7 @@ class BillOfMaterial extends Model
 
     public function bomItems()
     {
-        return $this->hasMany(BomItem::class);
+        return $this->hasMany(BomItem::class, 'bom_id');
     }
 
     public function createdBy()

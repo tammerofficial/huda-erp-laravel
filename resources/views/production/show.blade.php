@@ -10,11 +10,11 @@
         <div class="bg-white rounded-lg shadow-sm border p-6 mb-6">
             <div class="flex items-center justify-between">
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-900">🏭 Production Order: {{ $productionOrder->production_number }}</h2>
+                    <h2 class="text-2xl font-bold text-gray-900">🏭 Production Order: {{ $production->production_number }}</h2>
                     <p class="text-gray-600 mt-1">Complete production order information and stages</p>
                 </div>
                 <div class="flex space-x-3 space-x-reverse">
-                    <a href="{{ route('productions.edit', $productionOrder) }}" 
+                    <a href="{{ route('productions.edit', $production) }}" 
                        class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg flex items-center transition-colors">
                         <i class="fas fa-edit mr-2"></i>
                         Edit
@@ -40,38 +40,38 @@
                 <div class="space-y-4">
                     <div class="flex justify-between items-center py-2 border-b border-gray-100">
                         <span class="font-medium text-gray-700">Production Number:</span>
-                        <span class="text-gray-900 font-mono">{{ $productionOrder->production_number }}</span>
+                        <span class="text-gray-900 font-mono">{{ $production->production_number }}</span>
                     </div>
                     
                     <div class="flex justify-between items-center py-2 border-b border-gray-100">
                         <span class="font-medium text-gray-700">Order:</span>
-                        <span class="text-gray-900">{{ $productionOrder->order->order_number }}</span>
+                        <span class="text-gray-900">{{ $production->order->order_number }}</span>
                     </div>
                     
                     <div class="flex justify-between items-center py-2 border-b border-gray-100">
                         <span class="font-medium text-gray-700">Customer:</span>
-                        <span class="text-gray-900">{{ $productionOrder->order->customer->name }}</span>
+                        <span class="text-gray-900">{{ $production->order->customer->name }}</span>
                     </div>
                     
                     <div class="flex justify-between items-center py-2 border-b border-gray-100">
                         <span class="font-medium text-gray-700">Product:</span>
-                        <span class="text-gray-900">{{ $productionOrder->product->name }}</span>
+                        <span class="text-gray-900">{{ $production->product->name }}</span>
                     </div>
                     
                     <div class="flex justify-between items-center py-2 border-b border-gray-100">
                         <span class="font-medium text-gray-700">Quantity:</span>
-                        <span class="text-gray-900 font-semibold">{{ $productionOrder->quantity }}</span>
+                        <span class="text-gray-900 font-semibold">{{ $production->quantity }}</span>
                     </div>
                     
                     <div class="flex justify-between items-center py-2 border-b border-gray-100">
                         <span class="font-medium text-gray-700">Status:</span>
                         <span class="px-3 py-1 rounded-full text-sm font-medium
-                            @if($productionOrder->status == 'completed') bg-green-100 text-green-800
-                            @elseif($productionOrder->status == 'cancelled') bg-red-100 text-red-800
-                            @elseif($productionOrder->status == 'in-progress') bg-blue-100 text-blue-800
+                            @if($production->status == 'completed') bg-green-100 text-green-800
+                            @elseif($production->status == 'cancelled') bg-red-100 text-red-800
+                            @elseif($production->status == 'in-progress') bg-blue-100 text-blue-800
                             @else bg-yellow-100 text-yellow-800
                             @endif">
-                            {{ ucfirst(str_replace('-', ' ', $productionOrder->status)) }}
+                            {{ ucfirst(str_replace('-', ' ', $production->status)) }}
                         </span>
                     </div>
                 </div>
@@ -87,52 +87,52 @@
                 <div class="space-y-4">
                     <div class="flex justify-between items-center py-2 border-b border-gray-100">
                         <span class="font-medium text-gray-700">Start Date:</span>
-                        <span class="text-gray-900">{{ $productionOrder->start_date ? $productionOrder->start_date->format('M d, Y') : 'Not set' }}</span>
+                        <span class="text-gray-900">{{ $production->start_date ? $production->start_date->format('M d, Y') : 'Not set' }}</span>
                     </div>
                     
                     <div class="flex justify-between items-center py-2 border-b border-gray-100">
                         <span class="font-medium text-gray-700">End Date:</span>
-                        <span class="text-gray-900">{{ $productionOrder->end_date ? $productionOrder->end_date->format('M d, Y') : 'Not set' }}</span>
+                        <span class="text-gray-900">{{ $production->end_date ? $production->end_date->format('M d, Y') : 'Not set' }}</span>
                     </div>
                     
                     <div class="flex justify-between items-center py-2 border-b border-gray-100">
                         <span class="font-medium text-gray-700">Due Date:</span>
-                        <span class="text-gray-900">{{ $productionOrder->due_date ? $productionOrder->due_date->format('M d, Y') : 'Not set' }}</span>
+                        <span class="text-gray-900">{{ $production->due_date ? $production->due_date->format('M d, Y') : 'Not set' }}</span>
                     </div>
                     
                     <div class="flex justify-between items-center py-2 border-b border-gray-100">
                         <span class="font-medium text-gray-700">Priority:</span>
                         <span class="px-3 py-1 rounded-full text-sm font-medium
-                            @if($productionOrder->priority == 'urgent') bg-red-100 text-red-800
-                            @elseif($productionOrder->priority == 'high') bg-orange-100 text-orange-800
+                            @if($production->priority == 'urgent') bg-red-100 text-red-800
+                            @elseif($production->priority == 'high') bg-orange-100 text-orange-800
                             @else bg-blue-100 text-blue-800
                             @endif">
-                            {{ ucfirst($productionOrder->priority) }}
+                            {{ ucfirst($production->priority) }}
                         </span>
                     </div>
                     
                     <div class="flex justify-between items-center py-2 border-b border-gray-100">
                         <span class="font-medium text-gray-700">Estimated Cost:</span>
-                        <span class="text-gray-900 font-mono">{{ $productionOrder->estimated_cost ? number_format($productionOrder->estimated_cost, 2) . ' KWD' : 'Not specified' }}</span>
+                        <span class="text-gray-900 font-mono">{{ $production->estimated_cost ? number_format($production->estimated_cost, 2) . ' KWD' : 'Not specified' }}</span>
                     </div>
                     
                     <div class="flex justify-between items-center py-2 border-b border-gray-100">
                         <span class="font-medium text-gray-700">Actual Cost:</span>
-                        <span class="text-gray-900 font-mono">{{ $productionOrder->actual_cost ? number_format($productionOrder->actual_cost, 2) . ' KWD' : 'Not specified' }}</span>
+                        <span class="text-gray-900 font-mono">{{ $production->actual_cost ? number_format($production->actual_cost, 2) . ' KWD' : 'Not specified' }}</span>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Notes -->
-        @if($productionOrder->notes)
+        @if($production->notes)
         <div class="bg-white rounded-lg shadow-sm border p-6 mb-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                 <i class="fas fa-comment mr-2 text-purple-600"></i>
                 Notes
             </h3>
             <div class="prose max-w-none">
-                <p class="text-gray-900 leading-relaxed">{{ $productionOrder->notes }}</p>
+                <p class="text-gray-900 leading-relaxed">{{ $production->notes }}</p>
             </div>
         </div>
         @endif
@@ -144,7 +144,7 @@
                 Production Stages
             </h3>
             
-            @if($productionOrder->stages->count() > 0)
+            @if($production->stages->count() > 0)
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
@@ -159,7 +159,7 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach($productionOrder->stages as $stage)
+                            @foreach($production->stages as $stage)
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $stage->stage_name }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $stage->employee ? $stage->employee->user->name : 'Not assigned' }}</td>

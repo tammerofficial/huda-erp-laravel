@@ -57,18 +57,11 @@
 
         <!-- Statistics Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-            @php
-                $totalOrders = $customer->orders->count();
-                $totalSpent = $customer->orders->sum('final_amount');
-                $pendingOrders = $customer->orders->where('status', 'pending')->count();
-                $completedOrders = $customer->orders->where('status', 'completed')->count();
-            @endphp
-            
             <div class="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-500 uppercase">Total Orders</p>
-                        <p class="text-3xl font-bold text-gray-900 mt-2">{{ $totalOrders }}</p>
+                        <p class="text-3xl font-bold text-gray-900 mt-2">{{ $stats['total_orders'] ?? 0 }}</p>
                         <p class="text-xs text-gray-500 mt-1">All time orders</p>
                     </div>
                     <div class="h-14 w-14 rounded-full bg-gray-900 flex items-center justify-center">
@@ -81,7 +74,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-500 uppercase">Total Spent</p>
-                        <p class="text-3xl font-bold text-green-600 mt-2">{{ number_format($totalSpent, 0) }}</p>
+                        <p class="text-3xl font-bold text-green-600 mt-2">{{ number_format($stats['total_spent'] ?? 0, 0) }}</p>
                         <p class="text-xs text-gray-500 mt-1">KWD</p>
                     </div>
                     <div class="h-14 w-14 rounded-full bg-green-100 flex items-center justify-center">
@@ -94,7 +87,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-500 uppercase">Pending Orders</p>
-                        <p class="text-3xl font-bold text-yellow-600 mt-2">{{ $pendingOrders }}</p>
+                        <p class="text-3xl font-bold text-yellow-600 mt-2">{{ $stats['pending_orders'] ?? 0 }}</p>
                         <p class="text-xs text-gray-500 mt-1">Awaiting processing</p>
                     </div>
                     <div class="h-14 w-14 rounded-full bg-yellow-100 flex items-center justify-center">
@@ -107,7 +100,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-500 uppercase">Completed</p>
-                        <p class="text-3xl font-bold text-purple-600 mt-2">{{ $completedOrders }}</p>
+                        <p class="text-3xl font-bold text-purple-600 mt-2">{{ $stats['completed_orders'] ?? 0 }}</p>
                         <p class="text-xs text-gray-500 mt-1">Successfully delivered</p>
                     </div>
                     <div class="h-14 w-14 rounded-full bg-purple-100 flex items-center justify-center">
@@ -127,7 +120,7 @@
                             <i class="fas fa-shopping-bag mr-3 text-yellow-500"></i>
                             Orders History
                             <span class="mr-2 px-3 py-1 text-sm bg-gray-900 text-yellow-400 rounded-full">
-                                {{ $totalOrders }} Orders
+                                {{ $stats['total_orders'] ?? 0 }} Orders
                             </span>
                         </h3>
                     </div>
@@ -170,7 +163,7 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         <span class="px-2 py-1 bg-gray-100 rounded-full">
-                                            {{ $order->items->count() ?? 0 }} items
+                                            {{ $order->orderItems->count() ?? 0 }} items
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
@@ -338,12 +331,12 @@
                     <div class="space-y-4">
                         <div class="flex justify-between items-center pb-3 border-b">
                             <span class="text-sm text-gray-600">Total Spent</span>
-                            <span class="font-bold text-green-600 text-lg">KWD {{ number_format($totalSpent, 3) }}</span>
+                            <span class="font-bold text-green-600 text-lg">KWD {{ number_format($stats['total_spent'] ?? 0, 3) }}</span>
                         </div>
                         
                         <div class="flex justify-between items-center pb-3 border-b">
                             <span class="text-sm text-gray-600">Average Order Value</span>
-                            <span class="font-bold text-gray-900">KWD {{ $totalOrders > 0 ? number_format($totalSpent / $totalOrders, 3) : '0.000' }}</span>
+                            <span class="font-bold text-gray-900">KWD {{ $stats['total_orders'] > 0 ? number_format($stats['total_spent'] / $stats['total_orders'], 3) : '0.000' }}</span>
                         </div>
 
                         <div class="flex justify-between items-center pb-3 border-b">
@@ -354,7 +347,7 @@
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-gray-600">Available Credit</span>
                             <span class="font-bold text-purple-600">
-                                {{ $customer->credit_limit ? 'KWD ' . number_format(max(0, $customer->credit_limit - $totalSpent), 3) : 'Unlimited' }}
+                                {{ $customer->credit_limit ? 'KWD ' . number_format(max(0, $customer->credit_limit - ($stats['total_spent'] ?? 0)), 3) : 'Unlimited' }}
                             </span>
                         </div>
                     </div>
@@ -370,11 +363,11 @@
                     <div class="space-y-3">
                         @php
                             $statusCounts = [
-                                'pending' => $customer->orders->where('status', 'pending')->count(),
-                                'confirmed' => $customer->orders->where('status', 'confirmed')->count(),
-                                'in_production' => $customer->orders->where('status', 'in_production')->count(),
-                                'completed' => $customer->orders->where('status', 'completed')->count(),
-                                'cancelled' => $customer->orders->where('status', 'cancelled')->count(),
+                                'pending' => $stats['pending_orders'] ?? 0,
+                                'confirmed' => $stats['confirmed_orders'] ?? 0,
+                                'in_production' => $stats['in_production_orders'] ?? 0,
+                                'completed' => $stats['completed_orders'] ?? 0,
+                                'cancelled' => $stats['cancelled_orders'] ?? 0,
                             ];
                         @endphp
                         

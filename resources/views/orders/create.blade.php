@@ -14,7 +14,7 @@
                     <p class="text-gray-600 mt-1">Create a new customer order</p>
                 </div>
                 <a href="{{ route('orders.index') }}" 
-                   class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center transition-colors">
+                   class="btn-secondary px-4 py-2 rounded-lg flex items-center transition-colors">
                     <i class="fas fa-arrow-right mr-2"></i>
                     Back to Orders
                 </a>
@@ -27,7 +27,7 @@
             
             <!-- Customer Information -->
             <div class="bg-white rounded-lg shadow-sm border p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center">
                     <i class="fas fa-user mr-2 text-blue-600"></i>
                     Customer Information
                 </h3>
@@ -38,7 +38,7 @@
                             Customer <span class="text-red-500">*</span>
                         </label>
                         <select name="customer_id" id="customer_id" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('customer_id') border-red-500 @enderror">
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('customer_id') border-red-500 @enderror">
                             <option value="">Select Customer</option>
                             @foreach(\App\Models\Customer::all() as $customer)
                                 <option value="{{ $customer->id }}" {{ old('customer_id') == $customer->id ? 'selected' : '' }}>
@@ -58,7 +58,7 @@
                         <input type="text" name="order_number" id="order_number"
                                value="{{ old('order_number') }}"
                                placeholder="Auto-generated if empty"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('order_number') border-red-500 @enderror">
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('order_number') border-red-500 @enderror">
                         @error('order_number')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -70,7 +70,7 @@
                         </label>
                         <input type="date" name="order_date" id="order_date" required
                                value="{{ old('order_date', now()->format('Y-m-d')) }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('order_date') border-red-500 @enderror">
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('order_date') border-red-500 @enderror">
                         @error('order_date')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -82,7 +82,7 @@
                         </label>
                         <input type="date" name="delivery_date" id="delivery_date"
                                value="{{ old('delivery_date') }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('delivery_date') border-red-500 @enderror">
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('delivery_date') border-red-500 @enderror">
                         @error('delivery_date')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -92,7 +92,7 @@
 
             <!-- Order Details -->
             <div class="bg-white rounded-lg shadow-sm border p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center">
                     <i class="fas fa-shopping-cart mr-2 text-green-600"></i>
                     Order Details
                 </h3>
@@ -103,7 +103,7 @@
                             Status
                         </label>
                         <select name="status" id="status"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('status') border-red-500 @enderror">
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('status') border-red-500 @enderror">
                             <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>Pending</option>
                             <option value="confirmed" {{ old('status') == 'confirmed' ? 'selected' : '' }}>Confirmed</option>
                             <option value="in_production" {{ old('status') == 'in_production' ? 'selected' : '' }}>In Production</option>
@@ -122,7 +122,7 @@
                             Priority
                         </label>
                         <select name="priority" id="priority"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('priority') border-red-500 @enderror">
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('priority') border-red-500 @enderror">
                             <option value="low" {{ old('priority') == 'low' ? 'selected' : '' }}>Low</option>
                             <option value="medium" {{ old('priority') == 'medium' ? 'selected' : '' }}>Medium</option>
                             <option value="high" {{ old('priority') == 'high' ? 'selected' : '' }}>High</option>
@@ -138,7 +138,7 @@
                             Payment Status
                         </label>
                         <select name="payment_status" id="payment_status"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('payment_status') border-red-500 @enderror">
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('payment_status') border-red-500 @enderror">
                             <option value="pending" {{ old('payment_status') == 'pending' ? 'selected' : '' }}>Pending</option>
                             <option value="partial" {{ old('payment_status') == 'partial' ? 'selected' : '' }}>Partial</option>
                             <option value="paid" {{ old('payment_status') == 'paid' ? 'selected' : '' }}>Paid</option>
@@ -154,7 +154,7 @@
                             Payment Method
                         </label>
                         <select name="payment_method" id="payment_method"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('payment_method') border-red-500 @enderror">
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('payment_method') border-red-500 @enderror">
                             <option value="cash" {{ old('payment_method') == 'cash' ? 'selected' : '' }}>Cash</option>
                             <option value="credit_card" {{ old('payment_method') == 'credit_card' ? 'selected' : '' }}>Credit Card</option>
                             <option value="bank_transfer" {{ old('payment_method') == 'bank_transfer' ? 'selected' : '' }}>Bank Transfer</option>
@@ -169,7 +169,7 @@
 
             <!-- Order Items -->
             <div class="bg-white rounded-lg shadow-sm border p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center">
                     <i class="fas fa-list mr-2 text-purple-600"></i>
                     Order Items
                 </h3>
@@ -179,7 +179,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Product</label>
-                                <select name="items[0][product_id]" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <select name="items[0][product_id]" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent">
                                     <option value="">Select Product</option>
                                     @foreach(\App\Models\Product::all() as $product)
                                         <option value="{{ $product->id }}">{{ $product->name }}</option>
@@ -189,12 +189,12 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
                                 <input type="number" name="items[0][quantity]" min="1" value="1"
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Unit Price</label>
                                 <input type="number" name="items[0][unit_price]" step="0.01" min="0"
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent">
                             </div>
                             <div class="flex items-end">
                                 <button type="button" onclick="removeItem(this)" class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg">
@@ -213,7 +213,7 @@
 
             <!-- Order Totals -->
             <div class="bg-white rounded-lg shadow-sm border p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center">
                     <i class="fas fa-calculator mr-2 text-orange-600"></i>
                     Order Totals
                 </h3>
@@ -225,7 +225,7 @@
                         </label>
                         <input type="number" name="subtotal" id="subtotal" step="0.01" min="0"
                                value="{{ old('subtotal') }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('subtotal') border-red-500 @enderror">
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('subtotal') border-red-500 @enderror">
                         @error('subtotal')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -237,7 +237,7 @@
                         </label>
                         <input type="number" name="tax_amount" id="tax_amount" step="0.01" min="0"
                                value="{{ old('tax_amount', 0) }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('tax_amount') border-red-500 @enderror">
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('tax_amount') border-red-500 @enderror">
                         @error('tax_amount')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -249,7 +249,7 @@
                         </label>
                         <input type="number" name="discount_amount" id="discount_amount" step="0.01" min="0"
                                value="{{ old('discount_amount', 0) }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('discount_amount') border-red-500 @enderror">
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('discount_amount') border-red-500 @enderror">
                         @error('discount_amount')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -261,7 +261,7 @@
                         </label>
                         <input type="number" name="shipping_cost" id="shipping_cost" step="0.01" min="0"
                                value="{{ old('shipping_cost', 0) }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('shipping_cost') border-red-500 @enderror">
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('shipping_cost') border-red-500 @enderror">
                         @error('shipping_cost')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -271,7 +271,7 @@
 
             <!-- Additional Information -->
             <div class="bg-white rounded-lg shadow-sm border p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center">
                     <i class="fas fa-info-circle mr-2 text-indigo-600"></i>
                     Additional Information
                 </h3>
@@ -283,7 +283,7 @@
                         </label>
                         <textarea name="billing_address" id="billing_address" rows="3"
                                   placeholder="Enter billing address..."
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('billing_address') border-red-500 @enderror">{{ old('billing_address') }}</textarea>
+                                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('billing_address') border-red-500 @enderror">{{ old('billing_address') }}</textarea>
                         @error('billing_address')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -295,7 +295,7 @@
                         </label>
                         <textarea name="shipping_address" id="shipping_address" rows="3"
                                   placeholder="Enter shipping address..."
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('shipping_address') border-red-500 @enderror">{{ old('shipping_address') }}</textarea>
+                                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('shipping_address') border-red-500 @enderror">{{ old('shipping_address') }}</textarea>
                         @error('shipping_address')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -308,7 +308,7 @@
                     </label>
                     <textarea name="notes" id="notes" rows="3"
                               placeholder="Enter any additional notes..."
-                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('notes') border-red-500 @enderror">{{ old('notes') }}</textarea>
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('notes') border-red-500 @enderror">{{ old('notes') }}</textarea>
                     @error('notes')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -319,11 +319,11 @@
             <div class="bg-white rounded-lg shadow-sm border p-6">
                 <div class="flex justify-end space-x-4 space-x-reverse">
                     <a href="{{ route('orders.index') }}" 
-                       class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                       class="btn-secondary">
                         Cancel
                     </a>
                     <button type="submit" 
-                            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                            class="px-6 py-2 btn-primary transition-colors flex items-center">
                         <i class="fas fa-save mr-2"></i>
                         Create Order
                     </button>
@@ -346,7 +346,7 @@ function orderForm() {
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Product</label>
-                        <select name="items[${itemCount}][product_id]" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <select name="items[${itemCount}][product_id]" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent">
                             <option value="">Select Product</option>
                             @foreach(\App\Models\Product::all() as $product)
                                 <option value="{{ $product->id }}">{{ $product->name }}</option>
@@ -356,12 +356,12 @@ function orderForm() {
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
                         <input type="number" name="items[${itemCount}][quantity]" min="1" value="1"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Unit Price</label>
                         <input type="number" name="items[${itemCount}][unit_price]" step="0.01" min="0"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent">
                     </div>
                     <div class="flex items-end">
                         <button type="button" onclick="removeItem(this)" class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg">

@@ -12,10 +12,16 @@
                 <h2 class="text-2xl font-bold text-gray-900">⚙️ Production Orders Management</h2>
                 <p class="text-gray-600 mt-1">Manage production orders and track manufacturing progress</p>
             </div>
-            <a href="{{ route('productions.create') }}" class="btn-primary">
-                <i class="fas fa-plus"></i>
-                New Production Order
-            </a>
+            <div class="flex space-x-3 space-x-reverse">
+                <a href="{{ route('productions.dashboard') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center transition-colors">
+                    <i class="fas fa-chart-line mr-2"></i>
+                    Workshop Dashboard
+                </a>
+                <a href="{{ route('productions.create') }}" class="btn-primary">
+                    <i class="fas fa-plus mr-2"></i>
+                    New Production Order
+                </a>
+            </div>
         </div>
     </div>
 

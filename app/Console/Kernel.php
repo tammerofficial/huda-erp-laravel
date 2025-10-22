@@ -17,6 +17,18 @@ class Kernel extends ConsoleKernel
             ->everyFiveMinutes()
             ->withoutOverlapping()
             ->onOneServer();
+
+        // Check low stock and create auto-purchase orders daily at 9 AM
+        $schedule->command('stock:check-low --create-orders')
+            ->dailyAt('09:00')
+            ->withoutOverlapping()
+            ->onOneServer();
+
+        // Send low stock alerts daily at 8 AM (notification only)
+        $schedule->command('stock:check-low')
+            ->dailyAt('08:00')
+            ->withoutOverlapping()
+            ->onOneServer();
     }
 
     /**

@@ -1,96 +1,146 @@
 @extends('layouts.app')
 
-@section('title', 'New Warehouse')
+@section('title', 'Create New Warehouse')
+@section('page-title', 'Create Warehouse')
 
 @section('content')
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">New Warehouse</h3>
+<div>
+    <form action="{{ route('warehouses.store') }}" method="POST">
+        @csrf
+
+        <!-- Header Section -->
+        <div class="bg-white rounded-lg shadow-sm border p-6 mb-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Create New Warehouse</h2>
+                    <p class="text-gray-600 mt-1">Add a new warehouse location to your system</p>
                 </div>
-                <div class="card-body">
-                    <form action="{{ route('warehouses.store') }}" method="POST">
-                        @csrf
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="name">Name <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name') }}" required>
-                                    @error('name')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="location">Location <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control @error('location') is-invalid @enderror" id="location" name="location" value="{{ old('location') }}" required>
-                                    @error('location')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="capacity">Capacity</label>
-                                    <input type="number" class="form-control @error('capacity') is-invalid @enderror" id="capacity" name="capacity" value="{{ old('capacity') }}" min="0">
-                                    @error('capacity')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="manager_id">Manager</label>
-                                    <select class="form-control @error('manager_id') is-invalid @enderror" id="manager_id" name="manager_id">
-                                        <option value="">Select Manager</option>
-                                        @foreach($managers as $manager)
-                                            <option value="{{ $manager->id }}" {{ old('manager_id') == $manager->id ? 'selected' : '' }}>
-                                                {{ $manager->user->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('manager_id')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="notes">Notes</label>
-                            <textarea class="form-control @error('notes') is-invalid @enderror" id="notes" name="notes" rows="3">{{ old('notes') }}</textarea>
-                            @error('notes')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="form-group">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="is_active" name="is_active" value="1" {{ old('is_active', true) ? 'checked' : '' }}>
-                                <label class="form-check-label" for="is_active">
-                                    Active Warehouse
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Save Warehouse
-                            </button>
-                            <a href="{{ route('warehouses.index') }}" class="btn btn-secondary">
-                                <i class="fas fa-times"></i> Cancel
-                            </a>
-                        </div>
-                    </form>
+                <div class="flex space-x-3">
+                    <a href="{{ route('warehouses.index') }}" class="btn-secondary">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i>
+                        Create Warehouse
+                    </button>
                 </div>
             </div>
         </div>
-    </div>
+
+        <!-- Main Information -->
+        <div class="bg-white rounded-lg shadow-sm border p-6 mb-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-6">Warehouse Information</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Warehouse Name <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" 
+                           name="name" 
+                           value="{{ old('name') }}"
+                           required
+                           placeholder="e.g., Main Warehouse, Storage Unit A..."
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('name') border-red-500 @enderror">
+                    @error('name')
+                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Location <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" 
+                           name="location" 
+                           value="{{ old('location') }}"
+                           required
+                           placeholder="e.g., Shuwaikh Industrial Area, Kuwait..."
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('location') border-red-500 @enderror">
+                    @error('location')
+                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Storage Capacity (sq m)
+                    </label>
+                    <input type="number" 
+                           name="capacity" 
+                           value="{{ old('capacity') }}"
+                           min="0"
+                           step="0.01"
+                           placeholder="Total storage space in square meters"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('capacity') border-red-500 @enderror">
+                    @error('capacity')
+                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Warehouse Manager
+                    </label>
+                    <select name="manager_id" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('manager_id') border-red-500 @enderror">
+                        <option value="">Select Manager</option>
+                        @foreach($managers as $manager)
+                            <option value="{{ $manager->id }}" {{ old('manager_id') == $manager->id ? 'selected' : '' }}>
+                                {{ $manager->user->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('manager_id')
+                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Information -->
+        <div class="bg-white rounded-lg shadow-sm border p-6 mb-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-6">Additional Information</h3>
+            
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                    <textarea name="notes" 
+                              rows="4"
+                              placeholder="Additional notes about this warehouse, special storage conditions, access information..."
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('notes') border-red-500 @enderror">{{ old('notes') }}</textarea>
+                    @error('notes')
+                        <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="flex items-center">
+                    <input type="checkbox" 
+                           name="is_active" 
+                           id="is_active"
+                           value="1"
+                           {{ old('is_active', true) ? 'checked' : '' }}
+                           class="h-4 w-4 text-gray-900 focus:ring-gray-900 border-gray-300 rounded">
+                    <label for="is_active" class="mr-2 text-sm font-medium text-gray-700">
+                        Active Warehouse
+                    </label>
+                    <p class="text-xs text-gray-500">(Inactive warehouses won't appear in selections)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex justify-end space-x-3">
+            <a href="{{ route('warehouses.index') }}" class="btn-secondary">
+                <i class="fas fa-times"></i>
+                Cancel
+            </a>
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-save"></i>
+                Create Warehouse
+            </button>
+        </div>
+    </form>
 </div>
 @endsection

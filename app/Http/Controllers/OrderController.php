@@ -117,6 +117,20 @@ class OrderController extends Controller
     }
 
     /**
+     * Update order priority only
+     */
+    public function updatePriority(Request $request, Order $order)
+    {
+        $validated = $request->validate([
+            'priority' => 'required|in:low,normal,high,urgent',
+        ]);
+
+        $order->update(['priority' => $validated['priority']]);
+
+        return back()->with('success', 'Order priority updated successfully');
+    }
+
+    /**
      * Recalculate order costs
      */
     public function recalculateCosts(Order $order)

@@ -13,7 +13,7 @@ class MaterialController extends Controller
 {
     public function index()
     {
-        $materials = Material::with('supplier', 'inventory')->paginate(15);
+        $materials = Material::with('supplier', 'inventories')->paginate(15);
         return view('materials.index', compact('materials'));
     }
 
@@ -52,7 +52,7 @@ class MaterialController extends Controller
 
     public function show(Material $material)
     {
-        $material->load(['supplier', 'inventory.warehouse', 'bomItems.bom.product']);
+        $material->load(['supplier', 'inventories.warehouse', 'bomItems.bom.product']);
         return view('materials.show', compact('material'));
     }
 
@@ -101,6 +101,12 @@ class MaterialController extends Controller
         return redirect()->route('materials.index')->with('success', 'Material deleted successfully');
     }
 
+    public function showAdjustInventoryForm(Material $material)
+    {
+        $warehouses = \App\Models\Warehouse::where('is_active', true)->get();
+        return view('materials.adjust-inventory', compact('material', 'warehouses'));
+    }
+
     public function adjustInventory(Request $request, Material $material)
     {
         $request->validate([
@@ -144,5 +150,20 @@ class MaterialController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Inventory adjusted successfully');
+    }
+
+    /**
+     * Show low stock materials
+     */
+    public function lowStock()
+    {
+        $materials = Material::where('is_active', true)
+            ->with(['supplier', 'inventories'])
+            ->get()
+            ->filter(function ($material) {
+                return $material->isLowStock();
+            });
+
+        return view('materials.low-stock', compact('materials'));
     }
 }

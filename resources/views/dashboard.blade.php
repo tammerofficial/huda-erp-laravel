@@ -198,51 +198,106 @@
     <div class="welcome-banner">
         <div class="flex items-center justify-between">
             <div>
-                <h1>Welcome back, {{ auth()->user()->name ?? 'User' }}! 👋</h1>
+                <h1>Welcome back, {{ auth()->user()->name ?? 'User' }}!</h1>
                 <p class="mb-0">Here's what's happening with your business today.</p>
             </div>
-            <div>
-                <span class="text-white-50">{{ now()->format('l, F j, Y') }}</span>
+            <div class="text-right">
+                <div class="text-white" style="font-size: 0.95rem;">{{ now()->format('l, F j, Y') }}</div>
+                <div class="text-white-50" style="font-size: 0.85rem; opacity: 0.8;" dir="rtl">
+                    @php
+                        $date = now();
+                        // Simple Hijri conversion approximation
+                        $gregorianYear = $date->year;
+                        $gregorianMonth = $date->month;
+                        $gregorianDay = $date->day;
+                        
+                        // Calculate Julian Day Number
+                        $a = floor((14 - $gregorianMonth) / 12);
+                        $y = $gregorianYear + 4800 - $a;
+                        $m = $gregorianMonth + (12 * $a) - 3;
+                        $jd = $gregorianDay + floor((153 * $m + 2) / 5) + (365 * $y) + floor($y / 4) - floor($y / 100) + floor($y / 400) - 32045;
+                        
+                        // Convert to Hijri
+                        $l = $jd - 1948440 + 10632;
+                        $n = floor(($l - 1) / 10631);
+                        $l = $l - 10631 * $n + 354;
+                        $j = (floor((10985 - $l) / 5316)) * (floor((50 * $l) / 17719)) + (floor($l / 5670)) * (floor((43 * $l) / 15238));
+                        $l = $l - (floor((30 - $j) / 15)) * (floor((17719 * $j) / 50)) - (floor($j / 16)) * (floor((15238 * $j) / 43)) + 29;
+                        $hijriMonth = floor((24 * $l) / 709);
+                        $hijriDay = $l - floor((709 * $hijriMonth) / 24);
+                        $hijriYear = 30 * $n + $j - 30;
+                        
+                        $hijriMonths = [
+                            1 => 'محرم', 2 => 'صفر', 3 => 'ربيع الأول', 4 => 'ربيع الثاني',
+                            5 => 'جمادى الأولى', 6 => 'جمادى الثانية', 7 => 'رجب', 8 => 'شعبان',
+                            9 => 'رمضان', 10 => 'شوال', 11 => 'ذو القعدة', 12 => 'ذو الحجة'
+                        ];
+                        
+                        $hijriMonthName = $hijriMonths[$hijriMonth];
+                    @endphp
+                    {{ $hijriDay }} {{ $hijriMonthName }} {{ $hijriYear }} هـ
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Statistics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
+        <!-- In Production -->
         <div>
             <div class="stat-card">
                 <div class="flex justify-between items-start">
                     <div class="flex-grow">
-                        <div class="stat-label">Total Orders</div>
-                        <div class="stat-number">{{ $stats['total_orders'] ?? 0 }}</div>
+                        <div class="stat-label">In Production</div>
+                        <div class="stat-number">{{ $stats['in_production'] ?? 0 }}</div>
                         <small class="text-white-50" style="font-size: 0.75rem;">
-                            <i class="fas fa-arrow-up"></i> All time
+                            <i class="fas fa-cogs"></i> Active Orders
                         </small>
                     </div>
                     <div class="stat-icon">
-                        📦
+                        <i class="fas fa-industry"></i>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Completed Today -->
         <div>
             <div class="stat-card gold-accent">
                 <div class="flex justify-between items-start">
                     <div class="flex-grow">
-                        <div class="stat-label">Total Revenue</div>
-                        <div class="stat-number">{{ number_format($stats['total_revenue'] ?? 0, 0) }}</div>
+                        <div class="stat-label">Completed Today</div>
+                        <div class="stat-number">{{ $stats['completed_today'] ?? 0 }}</div>
                         <small style="opacity: 0.7; font-size: 0.75rem;">
-                            <i class="fas fa-arrow-up"></i> KWD
+                            <i class="fas fa-check-circle"></i> Production Orders
                         </small>
                     </div>
                     <div class="stat-icon">
-                        💰
+                        <i class="fas fa-check"></i>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Active Employees -->
+        <div>
+            <div class="stat-card">
+                <div class="flex justify-between items-start">
+                    <div class="flex-grow">
+                        <div class="stat-label">Active Staff</div>
+                        <div class="stat-number">{{ $stats['active_employees'] ?? 0 }}</div>
+                        <small class="text-white-50" style="font-size: 0.75rem;">
+                            <i class="fas fa-user-check"></i> Working Now
+                        </small>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Orders -->
         <div>
             <div class="stat-card">
                 <div class="flex justify-between items-start">
@@ -250,28 +305,11 @@
                         <div class="stat-label">Pending Orders</div>
                         <div class="stat-number">{{ $stats['pending_orders'] ?? 0 }}</div>
                         <small class="text-white-50" style="font-size: 0.75rem;">
-                            <i class="fas fa-clock"></i> Attention
+                            <i class="fas fa-clock"></i> Needs Attention
                         </small>
                     </div>
                     <div class="stat-icon">
-                        ⏱️
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div>
-            <div class="stat-card">
-                <div class="flex justify-between items-start">
-                    <div class="flex-grow">
-                        <div class="stat-label">Customers</div>
-                        <div class="stat-number">{{ $stats['total_customers'] ?? 0 }}</div>
-                        <small class="text-white-50" style="font-size: 0.75rem;">
-                            <i class="fas fa-users"></i> Active
-                        </small>
-                    </div>
-                    <div class="stat-icon">
-                        👥
+                        <i class="fas fa-hourglass-half"></i>
                     </div>
                 </div>
             </div>
@@ -329,36 +367,43 @@
         <div class="lg:col-span-1">
             <div class="luxury-card">
                 <div class="p-4 border-b border-gray-200">
-                    <h3 class="section-title mb-0">Quick Stats</h3>
+                    <h3 class="section-title mb-0">Production Stats</h3>
                 </div>
                 <div class="p-4">
                     <div class="quick-stat-item">
                         <div>
-                            <div class="text-muted small">Completed Orders</div>
+                            <div class="text-muted small"><i class="fas fa-bullseye mr-1"></i> Today's Target</div>
+                            <strong>Stages Completed</strong>
+                        </div>
+                        <div class="quick-stat-badge">{{ $stats['stages_completed_today'] ?? 0 }}</div>
+                    </div>
+                    <div class="quick-stat-item">
+                        <div>
+                            <div class="text-muted small"><i class="fas fa-box mr-1"></i> This Week</div>
                             <strong>Orders Completed</strong>
                         </div>
-                        <div class="quick-stat-badge">{{ $stats['completed_orders'] ?? 0 }}</div>
+                        <div class="quick-stat-badge">{{ $stats['completed_this_week'] ?? 0 }}</div>
                     </div>
                     <div class="quick-stat-item">
                         <div>
-                            <div class="text-muted small">Total Products</div>
-                            <strong>Products Available</strong>
+                            <div class="text-muted small"><i class="fas fa-cubes mr-1"></i> Total Materials</div>
+                            <strong>Materials in Stock</strong>
                         </div>
-                        <div class="quick-stat-badge">{{ $stats['total_products'] ?? 0 }}</div>
+                        <div class="quick-stat-badge">{{ $stats['total_materials'] ?? 0 }}</div>
                     </div>
-                    <div class="quick-stat-item">
+                    <div class="quick-stat-item" style="border-color: #d4af37;">
                         <div>
-                            <div class="text-muted small">In Production</div>
-                            <strong>Active Production</strong>
-                        </div>
-                        <div class="quick-stat-badge">{{ $stats['in_production'] ?? 0 }}</div>
-                    </div>
-                    <div class="quick-stat-item" style="border-color: #dc3545;">
-                        <div>
-                            <div class="text-danger small">⚠️ Alert</div>
+                            <div style="color: #d4af37; font-size: 0.75rem;"><i class="fas fa-exclamation-triangle mr-1"></i> Alert</div>
                             <strong>Low Stock Materials</strong>
                         </div>
-                        <div class="quick-stat-badge" style="background: #dc3545; color: #fff;">{{ $stats['low_stock_materials'] ?? 0 }}</div>
+                        <div class="quick-stat-badge" style="background: linear-gradient(135deg, #d4af37 0%, #f2d06b 100%); color: #1a1a1a;">{{ $stats['low_stock_materials'] ?? 0 }}</div>
+                    </div>
+                    <div class="quick-stat-item">
+                        <div>
+                            <div class="text-muted small"><i class="fas fa-user-friends mr-1"></i> Team</div>
+                            <strong>Total Employees</strong>
+                        </div>
+                        <div class="quick-stat-badge">{{ $stats['total_employees'] ?? 0 }}</div>
                     </div>
                 </div>
             </div>
@@ -401,23 +446,89 @@
     </div>
 
     @if(isset($production_orders) && $production_orders->count() > 0)
-    <!-- Production Orders -->
+    <!-- Active Production Orders -->
     <div class="luxury-card mt-4">
         <div class="p-4 border-b border-gray-200">
-            <h3 class="section-title mb-0">Active Production</h3>
+            <div class="flex items-center justify-between">
+                <h3 class="section-title mb-0"><i class="fas fa-industry mr-2"></i> Active Production Orders</h3>
+                <a href="{{ route('productions.dashboard') }}" class="text-sm hover:underline font-semibold" style="color: #d4af37;">
+                    View Workshop Dashboard <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
         </div>
         <div class="p-4">
-            @foreach($production_orders as $production)
-            <div class="mb-3">
-                <div class="flex justify-between items-center mb-2">
-                    <div>
-                        <strong class="block">{{ $production->product->name ?? 'N/A' }}</strong>
-                        <small class="text-gray-500">Order #{{ $production->order_id ?? 'N/A' }}</small>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                @foreach($production_orders as $production)
+                <div class="border border-gray-200 rounded-lg p-4 hover:border-gray-900 hover:shadow-md transition-all">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex-1">
+                            <h4 class="font-semibold text-gray-900 text-sm mb-1">{{ $production->production_number }}</h4>
+                            <p class="text-xs text-gray-600">{{ $production->product->name ?? 'N/A' }}</p>
+                        </div>
+                        <span class="px-2 py-1 rounded-full text-xs font-medium
+                            @if($production->status == 'in-progress') text-white" style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)
+                            @elseif($production->status == 'pending') text-gray-900" style="background: linear-gradient(135deg, #d4af37 0%, #f2d06b 100%)
+                            @else bg-gray-100 text-gray-800
+                            @endif">
+                            {{ ucfirst(str_replace('-', ' ', $production->status)) }}
+                        </span>
                     </div>
-                    <span class="badge-luxury success">In Progress</span>
+                    
+                    <div class="space-y-2 mb-3">
+                        <div class="flex items-center text-xs text-gray-600">
+                            <i class="fas fa-user w-4"></i>
+                            <span class="ml-2">{{ $production->order->customer->name ?? 'N/A' }}</span>
+                        </div>
+                        <div class="flex items-center text-xs text-gray-600">
+                            <i class="fas fa-box w-4"></i>
+                            <span class="ml-2">Qty: {{ $production->quantity }}</span>
+                        </div>
+                        <div class="flex items-center text-xs text-gray-600">
+                            <i class="fas fa-calendar w-4"></i>
+                            <span class="ml-2">Due: {{ $production->due_date ? $production->due_date->format('M d, Y') : 'Not set' }}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                        <span class="text-xs px-2 py-1 rounded-full
+                            @if($production->priority == 'urgent') text-white" style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)
+                            @elseif($production->priority == 'high') text-gray-900" style="background: linear-gradient(135deg, #d4af37 0%, #f2d06b 100%)
+                            @else bg-gray-100 text-gray-800
+                            @endif">
+                            <i class="fas fa-flag mr-1"></i>
+                            {{ ucfirst($production->priority ?? 'normal') }}
+                        </span>
+                        <a href="{{ route('productions.show', $production) }}" class="text-xs hover:underline font-semibold" style="color: #d4af37;">
+                            View Details <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
                 </div>
+                @endforeach
             </div>
-            @endforeach
+
+            @if($production_orders->count() >= 5)
+            <div class="mt-4 text-center">
+                <a href="{{ route('productions.index') }}" class="inline-block px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors">
+                    View All Production Orders
+                </a>
+            </div>
+            @endif
+        </div>
+    </div>
+    @else
+    <!-- No Active Production -->
+    <div class="luxury-card mt-4">
+        <div class="p-4 border-b border-gray-200">
+            <h3 class="section-title mb-0"><i class="fas fa-industry mr-2"></i> Active Production Orders</h3>
+        </div>
+        <div class="p-8 text-center">
+            <i class="fas fa-industry text-gray-300 text-5xl mb-4"></i>
+            <h4 class="text-lg font-semibold text-gray-700 mb-2">No Active Production Orders</h4>
+            <p class="text-gray-500 mb-4">Start a new production order to see it here</p>
+            <a href="{{ route('productions.create') }}" class="inline-block px-6 py-2 rounded-lg transition-colors btn-primary">
+                <i class="fas fa-plus mr-2"></i>
+                Create Production Order
+            </a>
         </div>
     </div>
     @endif

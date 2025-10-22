@@ -14,11 +14,6 @@
                     <p class="text-gray-600 mt-1">Complete order information and items</p>
                 </div>
                 <div class="flex space-x-3 space-x-reverse">
-                    <a href="{{ route('orders.edit', $order) }}" 
-                       class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg flex items-center transition-colors">
-                        <i class="fas fa-edit mr-2"></i>
-                        Edit
-                    </a>
                     <a href="{{ route('orders.index') }}" 
                        class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center transition-colors">
                         <i class="fas fa-arrow-left mr-2"></i>
@@ -78,13 +73,53 @@
                     
                     <div class="flex justify-between items-center py-2 border-b border-gray-100">
                         <span class="font-medium text-gray-700">Priority:</span>
-                        <span class="px-3 py-1 rounded-full text-sm font-medium
-                            @if($order->priority == 'urgent') bg-red-100 text-red-800
-                            @elseif($order->priority == 'high') bg-orange-100 text-orange-800
-                            @else bg-blue-100 text-blue-800
-                            @endif">
-                            {{ ucfirst($order->priority) }}
-                        </span>
+                        <div class="flex items-center space-x-2 space-x-reverse">
+                            <form action="{{ route('orders.update-priority', $order) }}" method="POST" class="inline-flex items-center" x-data="{ editing: false }">
+                                @csrf
+                                @method('PATCH')
+                                
+                                <template x-if="!editing">
+                                    <div class="flex items-center space-x-2 space-x-reverse">
+                                        <span class="px-3 py-1 rounded-full text-sm font-medium
+                                            @if($order->priority == 'urgent') bg-red-100 text-red-800
+                                            @elseif($order->priority == 'high') bg-orange-100 text-orange-800
+                                            @else bg-blue-100 text-blue-800
+                                            @endif">
+                                            {{ ucfirst($order->priority) }}
+                                        </span>
+                                        <button type="button" 
+                                                @click="editing = true"
+                                                class="text-blue-600 hover:text-blue-800 transition-colors"
+                                                title="Change Priority">
+                                            <i class="fas fa-edit text-sm"></i>
+                                        </button>
+                                    </div>
+                                </template>
+                                
+                                <template x-if="editing">
+                                    <div class="flex items-center space-x-2 space-x-reverse">
+                                        <select name="priority" 
+                                                class="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                            <option value="low" {{ $order->priority == 'low' ? 'selected' : '' }}>Low</option>
+                                            <option value="normal" {{ $order->priority == 'normal' ? 'selected' : '' }}>Normal</option>
+                                            <option value="high" {{ $order->priority == 'high' ? 'selected' : '' }}>High</option>
+                                            <option value="urgent" {{ $order->priority == 'urgent' ? 'selected' : '' }}>Urgent</option>
+                                        </select>
+                                        <button type="submit" 
+                                                class="px-2 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700 transition-colors"
+                                                title="Save">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                        <button type="button" 
+                                                @click="editing = false"
+                                                class="px-2 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600 transition-colors"
+                                                title="Cancel">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </template>
+                            </form>
+                        </div>
                     </div>
                     
                     @if($order->delivery_date)

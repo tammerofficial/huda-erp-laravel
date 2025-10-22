@@ -38,11 +38,38 @@ class WarehouseController extends Controller
 
     public function show(Warehouse $warehouse)
     {
-        $warehouse->load(['manager', 'inventories.material']);
-        $inventories = MaterialInventory::where('warehouse_id', $warehouse->id)
+        $warehouse->load('manager');
+        
+        // Get material inventory
+        $materialInventory = MaterialInventory::where('warehouse_id', $warehouse->id)
             ->with('material')
-            ->paginate(15);
-        return view('warehouses.show', compact('warehouse', 'inventories'));
+            ->limit(10)
+            ->get();
+        
+        // Get recent movements
+        $recentMovements = InventoryMovement::where('warehouse_id', $warehouse->id)
+            ->with(['material', 'createdBy'])
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
+        
+        // Calculate stats
+        $totalItems = MaterialInventory::where('warehouse_id', $warehouse->id)->count();
+        $lowStockItems = MaterialInventory::where('warehouse_id', $warehouse->id)
+            ->whereColumn('quantity', '<=', 'reorder_level')
+            ->count();
+        $outOfStock = MaterialInventory::where('warehouse_id', $warehouse->id)
+            ->where('quantity', 0)
+            ->count();
+        
+        return view('warehouses.show', compact(
+            'warehouse', 
+            'materialInventory', 
+            'recentMovements',
+            'totalItems',
+            'lowStockItems',
+            'outOfStock'
+        ));
     }
 
     public function edit(Warehouse $warehouse)

@@ -15,6 +15,9 @@ use App\Http\Controllers\AccountingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\BillOfMaterialController;
+use App\Http\Controllers\PayrollController;
+use App\Http\Controllers\AccountingDashboardController;
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -45,12 +48,21 @@ Route::post('products/{product}/bom', [ProductController::class, 'storeBOM'])->n
 Route::post('products/{product}/calculate-cost', [ProductController::class, 'calculateCost'])->name('products.calculate-cost');
 Route::post('products/{product}/update-pricing', [ProductController::class, 'updatePricing'])->name('products.update-pricing');
 
+// Bill of Materials (BOM) Routes - Independent Management
+Route::resource('bom', BillOfMaterialController::class)->parameters(['bom' => 'billOfMaterial']);
+Route::post('bom/{billOfMaterial}/duplicate', [BillOfMaterialController::class, 'duplicate'])->name('bom.duplicate');
+Route::post('bom/{billOfMaterial}/activate', [BillOfMaterialController::class, 'activate'])->name('bom.activate');
+Route::post('bom/bulk-create', [BillOfMaterialController::class, 'bulkCreate'])->name('bom.bulk-create');
+
 // Material Routes
 Route::resource('materials', MaterialController::class);
+Route::get('materials/{material}/adjust-inventory', [MaterialController::class, 'showAdjustInventoryForm'])->name('materials.adjust-inventory.form');
 Route::post('materials/{material}/adjust-inventory', [MaterialController::class, 'adjustInventory'])->name('materials.adjust-inventory');
+Route::get('materials-low-stock', [MaterialController::class, 'lowStock'])->name('materials.low-stock');
 
 // Order Routes
 Route::resource('orders', OrderController::class);
+Route::patch('orders/{order}/update-priority', [OrderController::class, 'updatePriority'])->name('orders.update-priority');
 Route::post('orders/sync-woocommerce', [OrderController::class, 'syncFromWooCommerce'])->name('orders.sync-woocommerce');
 Route::post('orders/{order}/recalculate-costs', [OrderController::class, 'recalculateCosts'])->name('orders.recalculate-costs');
 Route::get('orders/{order}/cost-breakdown', [OrderController::class, 'costBreakdown'])->name('orders.cost-breakdown');
@@ -61,11 +73,15 @@ Route::post('invoices/{invoice}/send', [InvoiceController::class, 'send'])->name
 Route::post('invoices/{invoice}/mark-paid', [InvoiceController::class, 'markPaid'])->name('invoices.mark-paid');
 
 // Purchase Order Routes
-Route::resource('purchases', PurchaseController::class);
-Route::post('purchases/{purchase}/receive', [PurchaseController::class, 'receive'])->name('purchases.receive');
+Route::resource('purchases', PurchaseController::class)->parameters(['purchases' => 'purchaseOrder']);
+Route::post('purchases/{purchaseOrder}/receive', [PurchaseController::class, 'receive'])->name('purchases.receive');
 
 // Production Order Routes
+Route::get('productions/dashboard', [ProductionController::class, 'dashboard'])->name('productions.dashboard');
+Route::get('productions/dashboard-data', [ProductionController::class, 'getDashboardData'])->name('productions.dashboard-data');
 Route::resource('productions', ProductionController::class);
+Route::get('productions/order/{order}/details', [ProductionController::class, 'getOrderDetails'])->name('productions.order-details');
+Route::post('production-stages/{stage}/assign', [ProductionController::class, 'assignStage'])->name('production-stages.assign');
 Route::post('production-stages/{stage}/start', [ProductionController::class, 'startStage'])->name('production-stages.start');
 Route::post('production-stages/{stage}/complete', [ProductionController::class, 'completeStage'])->name('production-stages.complete');
 
@@ -76,14 +92,26 @@ Route::get('warehouses/{warehouse}/movements', [WarehouseController::class, 'mov
 Route::resource('warehouses', WarehouseController::class);
 
 // Accounting Routes
+Route::get('accounting/advanced-dashboard', [AccountingDashboardController::class, 'index'])->name('accounting.advanced-dashboard');
 Route::get('accounting/journal', [AccountingController::class, 'journalEntries'])->name('accounting.journal.index');
 Route::get('accounting/journal/create', [AccountingController::class, 'createJournalEntry'])->name('accounting.journal.create');
 Route::post('accounting/journal', [AccountingController::class, 'storeJournalEntry'])->name('accounting.journal.store');
 Route::get('accounting/reports', [AccountingController::class, 'reports'])->name('accounting.reports');
 Route::resource('accounting', AccountingController::class);
 
+// Payroll Routes
+Route::get('payroll/generate', [PayrollController::class, 'showGenerateForm'])->name('payroll.generate');
+Route::post('payroll/generate', [PayrollController::class, 'generateMonthly'])->name('payroll.generate.store');
+Route::post('payroll/{payroll}/approve', [PayrollController::class, 'approve'])->name('payroll.approve');
+Route::post('payroll/{payroll}/mark-paid', [PayrollController::class, 'markAsPaid'])->name('payroll.mark-paid');
+Route::resource('payroll', PayrollController::class);
+
+// WooCommerce Integration
+Route::post('woocommerce/sync', [OrderController::class, 'syncFromWooCommerce'])->name('woocommerce.sync');
+
 // User Routes
 Route::resource('users', UserController::class);
+Route::post('users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
 
 // Reports Routes
 Route::get('reports/sales', function () {

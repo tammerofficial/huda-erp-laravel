@@ -14,7 +14,7 @@
                     <p class="text-gray-600 mt-1">Update order information</p>
                 </div>
                 <a href="{{ route('orders.index') }}" 
-                   class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center transition-colors">
+                   class="btn-secondary px-4 py-2 rounded-lg flex items-center transition-colors">
                     <i class="fas fa-arrow-right mr-2"></i>
                     Back to Orders
                 </a>
@@ -28,7 +28,7 @@
             
             <!-- Customer Information -->
             <div class="bg-white rounded-lg shadow-sm border p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center">
                     <i class="fas fa-user mr-2 text-blue-600"></i>
                     Customer Information
                 </h3>
@@ -39,7 +39,7 @@
                             Customer <span class="text-red-500">*</span>
                         </label>
                         <select name="customer_id" id="customer_id" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('customer_id') border-red-500 @enderror">
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('customer_id') border-red-500 @enderror">
                             <option value="">Select Customer</option>
                             @foreach($customers as $customer)
                                 <option value="{{ $customer->id }}" {{ old('customer_id', $order->customer_id) == $customer->id ? 'selected' : '' }}>
@@ -58,7 +58,7 @@
                         </label>
                         <input type="date" name="order_date" id="order_date" required
                                value="{{ old('order_date', $order->order_date->format('Y-m-d')) }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('order_date') border-red-500 @enderror">
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('order_date') border-red-500 @enderror">
                         @error('order_date')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -68,7 +68,7 @@
 
             <!-- Order Status -->
             <div class="bg-white rounded-lg shadow-sm border p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center">
                     <i class="fas fa-cog mr-2 text-green-600"></i>
                     Order Status
                 </h3>
@@ -79,7 +79,7 @@
                             Status <span class="text-red-500">*</span>
                         </label>
                         <select name="status" id="status" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('status') border-red-500 @enderror">
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('status') border-red-500 @enderror">
                             <option value="pending" {{ old('status', $order->status) == 'pending' ? 'selected' : '' }}>Pending</option>
                             <option value="on-hold" {{ old('status', $order->status) == 'on-hold' ? 'selected' : '' }}>On Hold</option>
                             <option value="in-production" {{ old('status', $order->status) == 'in-production' ? 'selected' : '' }}>In Production</option>
@@ -97,7 +97,7 @@
                             Payment Status
                         </label>
                         <select name="payment_status" id="payment_status"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('payment_status') border-red-500 @enderror">
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('payment_status') border-red-500 @enderror">
                             <option value="pending" {{ old('payment_status', $order->payment_status) == 'pending' ? 'selected' : '' }}>Pending</option>
                             <option value="partial" {{ old('payment_status', $order->payment_status) == 'partial' ? 'selected' : '' }}>Partial</option>
                             <option value="paid" {{ old('payment_status', $order->payment_status) == 'paid' ? 'selected' : '' }}>Paid</option>
@@ -113,7 +113,7 @@
                             Payment Type
                         </label>
                         <select name="payment_type" id="payment_type"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('payment_type') border-red-500 @enderror">
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('payment_type') border-red-500 @enderror">
                             <option value="">Select Payment Type</option>
                             <option value="cash" {{ old('payment_type', $order->payment_type) == 'cash' ? 'selected' : '' }}>Cash</option>
                             <option value="credit" {{ old('payment_type', $order->payment_type) == 'credit' ? 'selected' : '' }}>Credit</option>
@@ -131,7 +131,7 @@
                         </label>
                         <input type="date" name="delivery_date" id="delivery_date"
                                value="{{ old('delivery_date', $order->delivery_date ? $order->delivery_date->format('Y-m-d') : '') }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('delivery_date') border-red-500 @enderror">
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('delivery_date') border-red-500 @enderror">
                         @error('delivery_date')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -141,7 +141,7 @@
 
             <!-- Order Details -->
             <div class="bg-white rounded-lg shadow-sm border p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center">
                     <i class="fas fa-info-circle mr-2 text-purple-600"></i>
                     Order Details
                 </h3>
@@ -152,7 +152,7 @@
                             Priority
                         </label>
                         <select name="priority" id="priority"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('priority') border-red-500 @enderror">
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('priority') border-red-500 @enderror">
                             <option value="low" {{ old('priority', $order->priority) == 'low' ? 'selected' : '' }}>Low</option>
                             <option value="normal" {{ old('priority', $order->priority) == 'normal' ? 'selected' : '' }}>Normal</option>
                             <option value="high" {{ old('priority', $order->priority) == 'high' ? 'selected' : '' }}>High</option>
@@ -169,7 +169,7 @@
                         </label>
                         <input type="number" name="tax_amount" id="tax_amount" step="0.01" min="0"
                                value="{{ old('tax_amount', $order->tax_amount) }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('tax_amount') border-red-500 @enderror">
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('tax_amount') border-red-500 @enderror">
                         @error('tax_amount')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -181,7 +181,7 @@
                         </label>
                         <input type="number" name="discount_amount" id="discount_amount" step="0.01" min="0"
                                value="{{ old('discount_amount', $order->discount_amount) }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('discount_amount') border-red-500 @enderror">
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('discount_amount') border-red-500 @enderror">
                         @error('discount_amount')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -193,7 +193,7 @@
                         </label>
                         <input type="number" name="final_amount" id="final_amount" step="0.01" min="0"
                                value="{{ old('final_amount', $order->final_amount) }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('final_amount') border-red-500 @enderror">
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('final_amount') border-red-500 @enderror">
                         @error('final_amount')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -203,7 +203,7 @@
 
             <!-- Additional Information -->
             <div class="bg-white rounded-lg shadow-sm border p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center">
                     <i class="fas fa-comment mr-2 text-indigo-600"></i>
                     Additional Information
                 </h3>
@@ -215,7 +215,7 @@
                         </label>
                         <textarea name="notes" id="notes" rows="3"
                                   placeholder="Enter any additional notes..."
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('notes') border-red-500 @enderror">{{ old('notes', $order->notes) }}</textarea>
+                                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('notes') border-red-500 @enderror">{{ old('notes', $order->notes) }}</textarea>
                         @error('notes')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -227,7 +227,7 @@
                         </label>
                         <textarea name="shipping_address" id="shipping_address" rows="3"
                                   placeholder="Enter shipping address..."
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('shipping_address') border-red-500 @enderror">{{ old('shipping_address', $order->shipping_address) }}</textarea>
+                                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('shipping_address') border-red-500 @enderror">{{ old('shipping_address', $order->shipping_address) }}</textarea>
                         @error('shipping_address')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -239,11 +239,11 @@
             <div class="bg-white rounded-lg shadow-sm border p-6">
                 <div class="flex justify-end space-x-4 space-x-reverse">
                     <a href="{{ route('orders.index') }}" 
-                       class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                       class="btn-secondary">
                         Cancel
                     </a>
                     <button type="submit" 
-                            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                            class="px-6 py-2 btn-primary transition-colors flex items-center">
                         <i class="fas fa-save mr-2"></i>
                         Save Changes
                     </button>
