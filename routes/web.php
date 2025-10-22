@@ -19,6 +19,7 @@ use App\Http\Controllers\BillOfMaterialController;
 use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\AccountingDashboardController;
 use App\Http\Controllers\CostManagementController;
+use App\Http\Controllers\RoleManagementController;
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -123,9 +124,23 @@ Route::prefix('cost-management')->name('cost-management.')->group(function () {
 // WooCommerce Integration
 Route::post('woocommerce/sync', [OrderController::class, 'syncFromWooCommerce'])->name('woocommerce.sync');
 
-// User Routes
+// User Routes (Staff only)
 Route::resource('users', UserController::class);
 Route::post('users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
+
+// Role Management Routes (Management team only)
+Route::prefix('roles')->name('roles.')->group(function () {
+    Route::get('/', [RoleManagementController::class, 'index'])->name('index');
+    Route::get('create', [RoleManagementController::class, 'create'])->name('create');
+    Route::post('/', [RoleManagementController::class, 'store'])->name('store');
+    Route::get('{user}', [RoleManagementController::class, 'show'])->name('show');
+    Route::get('{user}/edit', [RoleManagementController::class, 'edit'])->name('edit');
+    Route::put('{user}', [RoleManagementController::class, 'update'])->name('update');
+    Route::delete('{user}', [RoleManagementController::class, 'destroy'])->name('destroy');
+    Route::post('{user}/toggle-status', [RoleManagementController::class, 'toggleStatus'])->name('toggle-status');
+    Route::post('{user}/reset-password', [RoleManagementController::class, 'resetPassword'])->name('reset-password');
+    Route::post('bulk-action', [RoleManagementController::class, 'bulkAction'])->name('bulk-action');
+});
 
 // Reports Routes
 Route::get('reports/sales', function () {

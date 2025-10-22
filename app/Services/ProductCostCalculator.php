@@ -27,7 +27,7 @@ class ProductCostCalculator
 
         $totalMaterialCost = $activeBOM->bomItems()
             ->join('materials', 'bom_items.material_id', '=', 'materials.id')
-            ->selectRaw('SUM(bom_items.quantity * materials.unit_price) as total')
+            ->selectRaw('SUM(bom_items.quantity * materials.unit_cost) as total')
             ->value('total');
 
         return (float) ($totalMaterialCost ?? 0);

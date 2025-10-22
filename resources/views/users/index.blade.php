@@ -9,8 +9,8 @@
     <div class="bg-white rounded-lg shadow-sm border p-6 mb-6">
         <div class="flex justify-between items-center">
             <div>
-                <h2 class="text-2xl font-bold text-gray-900">👤 Users Management</h2>
-                <p class="text-gray-600 mt-1">Manage system users and access control</p>
+                <h2 class="text-2xl font-bold text-gray-900">👤 Staff Users Management</h2>
+                <p class="text-gray-600 mt-1">Manage staff users and employee access</p>
             </div>
             <a href="{{ route('users.create') }}" class="btn-primary">
                 <i class="fas fa-plus"></i>
