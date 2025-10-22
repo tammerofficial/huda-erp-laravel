@@ -3,10 +3,10 @@
 @section('content')
 <div class="container mx-auto p-6">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold">🏭 سجلات الإنتاج</h1>
+        <h1 class="text-3xl font-bold">🏭 Production Logs</h1>
         <div class="flex gap-4">
             <a href="{{ route('production-logs.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                إضافة سجل إنتاج
+                Add Production Log
             </a>
             <a href="{{ route('qr.scanner') }}" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
                 QR Scanner
@@ -24,7 +24,7 @@
                     </svg>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">إجمالي القطع المنتجة</p>
+                    <p class="text-sm font-medium text-gray-600">Total Pieces Produced</p>
                     <p class="text-2xl font-bold text-blue-600">{{ number_format($productionLogs->sum('pieces_completed')) }}</p>
                 </div>
             </div>
@@ -38,7 +38,7 @@
                     </svg>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">إجمالي الأرباح</p>
+                    <p class="text-sm font-medium text-gray-600">Total Earnings</p>
                     <p class="text-2xl font-bold text-green-600">{{ number_format($productionLogs->sum('earnings'), 3) }} KWD</p>
                 </div>
             </div>
@@ -52,7 +52,7 @@
                     </svg>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">متوسط الكفاءة</p>
+                    <p class="text-sm font-medium text-gray-600">Average Efficiency</p>
                     <p class="text-2xl font-bold text-yellow-600">{{ number_format($productionLogs->avg('efficiency_rate'), 1) }}%</p>
                 </div>
             </div>
@@ -66,7 +66,7 @@
                     </svg>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">في انتظار الجودة</p>
+                    <p class="text-sm font-medium text-gray-600">Pending Quality</p>
                     <p class="text-2xl font-bold text-purple-600">{{ $productionLogs->where('quality_status', 'pending')->count() }}</p>
                 </div>
             </div>
@@ -76,21 +76,21 @@
     <!-- Production Logs Table -->
     <div class="bg-white rounded-lg shadow overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200">
-            <h2 class="text-xl font-semibold">سجلات الإنتاج</h2>
+            <h2 class="text-xl font-semibold">Production Logs</h2>
         </div>
         
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الموظف</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">المنتج</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">المرحلة</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">القطع المكتملة</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">المدة</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الأرباح</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الجودة</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الإجراءات</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Stage</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Pieces Completed</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Earnings</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Quality</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -121,7 +121,7 @@
                             {{ number_format($log->pieces_completed) }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {{ $log->duration_minutes ? number_format($log->duration_minutes / 60, 1) . ' ساعة' : '-' }}
+                            {{ $log->duration_minutes ? number_format($log->duration_minutes / 60, 1) . 'h' : '-' }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {{ number_format($log->earnings, 3) }} KWD
@@ -129,30 +129,30 @@
                         <td class="px-6 py-4 whitespace-nowrap">
                             @if($log->quality_status === 'approved')
                                 <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                    مقبول
+                                    Approved
                                 </span>
                             @elseif($log->quality_status === 'rejected')
                                 <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
-                                    مرفوض
+                                    Rejected
                                 </span>
                             @else
                                 <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                    في الانتظار
+                                    Pending
                                 </span>
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex space-x-2">
-                                <a href="{{ route('production-logs.show', $log) }}" class="text-blue-600 hover:text-blue-900">عرض</a>
-                                <a href="{{ route('production-logs.edit', $log) }}" class="text-indigo-600 hover:text-indigo-900">تعديل</a>
+                                <a href="{{ route('production-logs.show', $log) }}" class="text-blue-600 hover:text-blue-900">View</a>
+                                <a href="{{ route('production-logs.edit', $log) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
                                 @if($log->quality_status === 'pending')
                                     <form action="{{ route('production-logs.approve', $log) }}" method="POST" class="inline">
                                         @csrf
-                                        <button type="submit" class="text-green-600 hover:text-green-900">قبول</button>
+                                        <button type="submit" class="text-green-600 hover:text-green-900">Approve</button>
                                     </form>
                                     <form action="{{ route('production-logs.reject', $log) }}" method="POST" class="inline">
                                         @csrf
-                                        <button type="submit" class="text-red-600 hover:text-red-900">رفض</button>
+                                        <button type="submit" class="text-red-600 hover:text-red-900">Reject</button>
                                     </form>
                                 @endif
                             </div>
@@ -161,7 +161,7 @@
                     @empty
                     <tr>
                         <td colspan="8" class="px-6 py-4 text-center text-gray-500">
-                            لا توجد سجلات إنتاج
+                            No production logs found
                         </td>
                     </tr>
                     @endforelse

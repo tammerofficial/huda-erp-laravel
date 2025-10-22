@@ -117,15 +117,129 @@ class ProductionController extends Controller
      */
     public function getDashboardData()
     {
-        // Same logic as dashboard() but return JSON
-        $dashboardController = new self();
-        $view = $dashboardController->dashboard();
-        $data = $view->getData();
+        // Get all active employees with their current tasks
+        $employees = Employee::where('employment_status', 'active')
+            ->whereIn('department', ['Cutting', 'Sewing', 'Embroidery', 'Quality Assurance', 'Finishing'])
+            ->with(['user'])
+            ->get()
+            ->map(function ($employee) {
+                // Get current task (in-progress stage assigned to this employee)
+                $currentTask = ProductionStage::where('employee_id', $employee->id)
+                    ->where('status', 'in-progress')
+                    ->with(['productionOrder.product', 'productionOrder.order'])
+                    ->first();
+
+                // Get pending tasks (pending stages assigned to this employee)
+                $pendingTasks = ProductionStage::where('employee_id', $employee->id)
+                    ->where('status', 'pending')
+                    ->with(['productionOrder.product', 'productionOrder.order'])
+                    ->get();
+
+                // Get employee stats
+                $stats = [
+                    'today' => ProductionStage::where('employee_id', $employee->id)
+                        ->where('status', 'completed')
+                        ->whereDate('end_time', today())
+                        ->count(),
+                    'week' => ProductionStage::where('employee_id', $employee->id)
+                        ->where('status', 'completed')
+                        ->whereBetween('end_time', [now()->startOfWeek(), now()->endOfWeek()])
+                        ->count(),
+                    'total' => ProductionStage::where('employee_id', $employee->id)
+                        ->where('status', 'completed')
+                        ->count(),
+                ];
+
+                return [
+                    'id' => $employee->id,
+                    'name' => $employee->user->name,
+                    'employee_id' => $employee->employee_id,
+                    'position' => $employee->position,
+                    'department' => $employee->department,
+                    'initials' => strtoupper(substr($employee->user->name, 0, 2)),
+                    'current_task' => $currentTask ? [
+                        'stage_id' => $currentTask->id,
+                        'production_number' => $currentTask->productionOrder->production_number,
+                        'product_name' => $currentTask->productionOrder->product->name,
+                        'stage' => ucfirst(str_replace('_', ' ', $currentTask->stage_name)),
+                        'priority' => $currentTask->productionOrder->priority ?? 'normal',
+                    ] : null,
+                    'tasks' => $pendingTasks->map(function ($task) {
+                        return [
+                            'stage_id' => $task->id,
+                            'production_number' => $task->productionOrder->production_number,
+                            'product_name' => $task->productionOrder->product->name,
+                            'stage' => ucfirst(str_replace('_', ' ', $task->stage_name)),
+                            'priority' => $task->productionOrder->priority ?? 'normal',
+                        ];
+                    })->toArray(),
+                    'stats' => $stats,
+                ];
+            });
+
+        // Get all pending stages (not assigned yet)
+        $pendingStages = ProductionStage::where('status', 'pending')
+            ->whereNull('employee_id')
+            ->with(['productionOrder.product', 'productionOrder.order.customer'])
+            ->get()
+            ->map(function ($stage) {
+                return [
+                    'id' => $stage->id,
+                    'production_number' => $stage->productionOrder->production_number,
+                    'product_name' => $stage->productionOrder->product->name,
+                    'customer_name' => $stage->productionOrder->order->customer->name,
+                    'stage_name' => $stage->stage_name,
+                    'priority' => $stage->productionOrder->priority ?? 'normal',
+                ];
+            });
+
+        // Calculate stats
+        $stats = [
+            'activeOrders' => ProductionOrder::whereIn('status', ['pending', 'in-progress'])->count(),
+            'activeEmployees' => Employee::where('employment_status', 'active')
+                ->whereIn('department', ['Cutting', 'Sewing', 'Embroidery', 'Quality Assurance', 'Finishing'])
+                ->count(),
+            'inProgressStages' => ProductionStage::where('status', 'in-progress')->count(),
+            'completedToday' => ProductionStage::where('status', 'completed')
+                ->whereDate('end_time', today())
+                ->count(),
+        ];
 
         return response()->json([
-            'employees' => $data['employees'],
-            'pendingStages' => $data['pendingStages'],
-            'stats' => $data['stats'],
+            'employees' => $employees,
+            'pendingStages' => $pendingStages,
+            'stats' => $stats,
+        ]);
+    }
+
+    /**
+     * Get active production orders
+     */
+    public function getActiveOrders()
+    {
+        $orders = ProductionOrder::whereIn('status', ['pending', 'in-progress'])
+            ->with(['product', 'order.customer'])
+            ->get()
+            ->map(function ($order) {
+                // Calculate progress based on completed stages
+                $totalStages = $order->productionStages()->count();
+                $completedStages = $order->productionStages()->where('status', 'completed')->count();
+                $progress = $totalStages > 0 ? round(($completedStages / $totalStages) * 100) : 0;
+
+                return [
+                    'id' => $order->id,
+                    'production_number' => $order->production_number,
+                    'product_name' => $order->product->name,
+                    'customer_name' => $order->order->customer->name,
+                    'status' => $order->status,
+                    'priority' => $order->priority ?? 'normal',
+                    'progress' => $progress,
+                    'created_at' => $order->created_at->format('Y-m-d H:i'),
+                ];
+            });
+
+        return response()->json([
+            'orders' => $orders,
         ]);
     }
 

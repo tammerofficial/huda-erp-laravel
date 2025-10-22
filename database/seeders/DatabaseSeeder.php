@@ -22,10 +22,11 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
-        // Seed employees and material inventory
+        // Seed employees, material inventory, and BOM data
         $this->call([
             EmployeeSeeder::class,
             MaterialInventorySeeder::class,
+            BOMSeeder::class,
         ]);
     }
 }

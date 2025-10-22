@@ -38,7 +38,7 @@
                     </svg>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">غائب اليوم</p>
+                    <p class="text-sm font-medium text-gray-600">Absent Today</p>
                     <p class="text-2xl font-bold text-red-600">{{ $attendanceRecords->where('date', today())->where('status', 'absent')->count() }}</p>
                 </div>
             </div>
@@ -52,7 +52,7 @@
                     </svg>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">متأخر اليوم</p>
+                    <p class="text-sm font-medium text-gray-600">Late Today</p>
                     <p class="text-2xl font-bold text-yellow-600">{{ $attendanceRecords->where('date', today())->where('status', 'late')->count() }}</p>
                 </div>
             </div>
@@ -66,7 +66,7 @@
                     </svg>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">إجمالي الساعات</p>
+                    <p class="text-sm font-medium text-gray-600">Total Hours</p>
                     <p class="text-2xl font-bold text-blue-600">{{ number_format($attendanceRecords->sum('hours_worked'), 1) }}</p>
                 </div>
             </div>
@@ -76,20 +76,20 @@
     <!-- Attendance Records Table -->
     <div class="bg-white rounded-lg shadow overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200">
-            <h2 class="text-xl font-semibold">سجلات الحضور</h2>
+            <h2 class="text-xl font-semibold">Attendance Records</h2>
         </div>
         
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الموظف</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">التاريخ</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">وقت الدخول</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">وقت الخروج</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">ساعات العمل</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الحالة</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الإجراءات</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Check In</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Check Out</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Hours Worked</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -120,35 +120,35 @@
                             {{ $record->check_out ?? '-' }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {{ number_format($record->hours_worked, 1) }} ساعة
+                            {{ number_format($record->hours_worked, 1) }}h
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             @if($record->status === 'present')
                                 <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                    حاضر
+                                    Present
                                 </span>
                             @elseif($record->status === 'absent')
                                 <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
-                                    غائب
+                                    Absent
                                 </span>
                             @elseif($record->status === 'late')
                                 <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                    متأخر
+                                    Late
                                 </span>
                             @else
                                 <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
-                                    نصف يوم
+                                    Half Day
                                 </span>
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex space-x-2">
-                                <a href="{{ route('attendance.show', $record) }}" class="text-blue-600 hover:text-blue-900">عرض</a>
-                                <a href="{{ route('attendance.edit', $record) }}" class="text-indigo-600 hover:text-indigo-900">تعديل</a>
+                                <a href="{{ route('attendance.show', $record) }}" class="text-blue-600 hover:text-blue-900">View</a>
+                                <a href="{{ route('attendance.edit', $record) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
                                 <form action="{{ route('attendance.destroy', $record) }}" method="POST" class="inline">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('هل أنت متأكد من الحذف؟')">حذف</button>
+                                    <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Are you sure you want to delete?')">Delete</button>
                                 </form>
                             </div>
                         </td>
@@ -156,7 +156,7 @@
                     @empty
                     <tr>
                         <td colspan="7" class="px-6 py-4 text-center text-gray-500">
-                            لا توجد سجلات حضور
+                            No attendance records found
                         </td>
                     </tr>
                     @endforelse

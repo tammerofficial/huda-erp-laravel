@@ -112,13 +112,16 @@ Route::resource('purchases', PurchaseController::class)->parameters(['purchases'
 Route::post('purchases/{purchaseOrder}/receive', [PurchaseController::class, 'receive'])->name('purchases.receive');
 
 // Production Order Routes
-Route::get('productions/dashboard', [ProductionController::class, 'dashboard'])->name('productions.dashboard');
-Route::get('productions/dashboard-data', [ProductionController::class, 'getDashboardData'])->name('productions.dashboard-data');
-Route::resource('productions', ProductionController::class);
-Route::get('productions/order/{order}/details', [ProductionController::class, 'getOrderDetails'])->name('productions.order-details');
-Route::post('production-stages/{stage}/assign', [ProductionController::class, 'assignStage'])->name('production-stages.assign');
-Route::post('production-stages/{stage}/start', [ProductionController::class, 'startStage'])->name('production-stages.start');
-Route::post('production-stages/{stage}/complete', [ProductionController::class, 'completeStage'])->name('production-stages.complete');
+Route::middleware(['permission:production.view'])->group(function () {
+    Route::get('productions/dashboard', [ProductionController::class, 'dashboard'])->name('productions.dashboard');
+       Route::get('productions/dashboard-data', [ProductionController::class, 'getDashboardData'])->name('productions.dashboard-data');
+       Route::get('productions/active-orders', [ProductionController::class, 'getActiveOrders'])->name('productions.active-orders');
+    Route::resource('productions', ProductionController::class);
+    Route::get('productions/order/{order}/details', [ProductionController::class, 'getOrderDetails'])->name('productions.order-details');
+    Route::post('production-stages/{stage}/assign', [ProductionController::class, 'assignStage'])->name('production-stages.assign');
+    Route::post('production-stages/{stage}/start', [ProductionController::class, 'startStage'])->name('production-stages.start');
+    Route::post('production-stages/{stage}/complete', [ProductionController::class, 'completeStage'])->name('production-stages.complete');
+});
 
 // Warehouse Routes
 Route::get('warehouses/low-stock', [WarehouseController::class, 'lowStock'])->name('warehouses.low-stock');
