@@ -18,6 +18,7 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\BillOfMaterialController;
 use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\AccountingDashboardController;
+use App\Http\Controllers\CostManagementController;
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -105,6 +106,19 @@ Route::post('payroll/generate', [PayrollController::class, 'generateMonthly'])->
 Route::post('payroll/{payroll}/approve', [PayrollController::class, 'approve'])->name('payroll.approve');
 Route::post('payroll/{payroll}/mark-paid', [PayrollController::class, 'markAsPaid'])->name('payroll.mark-paid');
 Route::resource('payroll', PayrollController::class);
+
+// Cost Management Routes
+Route::prefix('cost-management')->name('cost-management.')->group(function () {
+    Route::get('dashboard', [CostManagementController::class, 'dashboard'])->name('dashboard');
+    Route::get('products', [CostManagementController::class, 'products'])->name('products');
+    Route::get('orders', [CostManagementController::class, 'orders'])->name('orders');
+    Route::get('profitability', [CostManagementController::class, 'profitability'])->name('profitability');
+    
+    // AJAX Routes
+    Route::post('products/{product}/recalculate', [CostManagementController::class, 'recalculateProductCost'])->name('products.recalculate');
+    Route::post('orders/{order}/recalculate', [CostManagementController::class, 'recalculateOrderCost'])->name('orders.recalculate');
+    Route::post('products/bulk-recalculate', [CostManagementController::class, 'bulkRecalculateProducts'])->name('products.bulk-recalculate');
+});
 
 // WooCommerce Integration
 Route::post('woocommerce/sync', [OrderController::class, 'syncFromWooCommerce'])->name('woocommerce.sync');
