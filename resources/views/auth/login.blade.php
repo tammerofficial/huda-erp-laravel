@@ -11,7 +11,7 @@
                     <h3 class="card-title text-center">Login to Huda ERP</h3>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('login') }}">
+                    <form method="POST" action="{{ route('login.post') }}">
                         @csrf
                         <div class="form-group">
                             <label for="email">Email Address</label>

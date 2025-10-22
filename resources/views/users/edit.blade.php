@@ -60,12 +60,11 @@
                                     <label for="role" class="block text-sm font-medium text-gray-700 mb-2">Role <span class="text-danger">*</span></label>
                                     <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent @error('role') border-red-500 @enderror" id="role" name="role" required>
                                         <option value="">Select Role</option>
-                                        <option value="super_admin" {{ old('role', $user->role) == 'super_admin' ? 'selected' : '' }}>Super Admin</option>
-                                        <option value="admin" {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>Admin</option>
-                                        <option value="manager" {{ old('role', $user->role) == 'manager' ? 'selected' : '' }}>Manager</option>
-                                        <option value="accountant" {{ old('role', $user->role) == 'accountant' ? 'selected' : '' }}>Accountant</option>
-                                        <option value="production_staff" {{ old('role', $user->role) == 'production_staff' ? 'selected' : '' }}>Production Staff</option>
-                                        <option value="purchasing_agent" {{ old('role', $user->role) == 'purchasing_agent' ? 'selected' : '' }}>Purchasing Agent</option>
+                                        @foreach($roles as $role)
+                                            <option value="{{ $role->name }}" {{ old('role', $user->roles->first()?->name) == $role->name ? 'selected' : '' }}>
+                                                {{ ucfirst($role->name) }} ({{ $role->permissions->count() }} permissions)
+                                            </option>
+                                        @endforeach
                                     </select>
                                     @error('role')
                                         <div class="mt-1 text-sm text-red-500">{{ $message }}</div>

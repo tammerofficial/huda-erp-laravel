@@ -95,12 +95,28 @@ class AccountingDashboardController extends Controller
 
     private function getOrdersAnalytics($dateFrom, $dateTo, $period)
     {
-        $query = Order::whereBetween('created_at', [$dateFrom, $dateTo]);
+        // Get ERP orders
+        $erpOrders = Order::whereBetween('created_at', [$dateFrom, $dateTo]);
+        $erpTotal = $erpOrders->sum('total_amount');
+        $erpCount = $erpOrders->count();
+        
+        // Get WooCommerce orders
+        $wooOrders = WooCommerceSale::whereBetween('order_date', [$dateFrom, $dateTo]);
+        $wooTotal = $wooOrders->sum('total');
+        $wooCount = $wooOrders->count();
+        
+        $totalOrders = $erpCount + $wooCount;
+        $totalRevenue = $erpTotal + $wooTotal;
+        $averageOrderValue = $totalOrders > 0 ? $totalRevenue / $totalOrders : 0;
         
         return [
-            'total_orders' => $query->count(),
-            'total_revenue' => $query->sum('total_amount'),
-            'average_order_value' => $query->avg('total_amount'),
+            'total_orders' => $totalOrders,
+            'total_revenue' => $totalRevenue,
+            'average_order_value' => $averageOrderValue,
+            'erp_orders' => $erpCount,
+            'woocommerce_orders' => $wooCount,
+            'erp_revenue' => $erpTotal,
+            'woocommerce_revenue' => $wooTotal,
             'pending_orders' => Order::where('status', 'pending')->count(),
             'processing_orders' => Order::where('status', 'processing')->count(),
             'completed_orders' => Order::where('status', 'completed')->count(),
@@ -415,13 +431,31 @@ class AccountingDashboardController extends Controller
 
     private function getFinancialSummary($dateFrom, $dateTo)
     {
-        $revenue = Order::where('status', '!=', 'cancelled')->whereBetween('created_at', [$dateFrom, $dateTo])->sum('total_amount');
-        $wooRevenue = WooCommerceSale::whereBetween('order_date', [$dateFrom, $dateTo])->sum('total');
-        $totalRevenue = $revenue + $wooRevenue;
+        // ERP Revenue
+        $erpRevenue = Order::where('status', '!=', 'cancelled')
+            ->whereBetween('created_at', [$dateFrom, $dateTo])
+            ->sum('total_amount') ?? 0;
         
-        $productionCosts = ProductionOrder::whereBetween('created_at', [$dateFrom, $dateTo])->sum('actual_cost');
-        $purchaseCosts = PurchaseOrder::where('status', 'completed')->whereBetween('created_at', [$dateFrom, $dateTo])->sum('total_amount');
-        $payrollCosts = Payroll::where('status', 'paid')->whereBetween('period_start', [$dateFrom, $dateTo])->sum('total_amount');
+        // WooCommerce Revenue
+        $wooRevenue = WooCommerceSale::whereBetween('order_date', [$dateFrom, $dateTo])
+            ->sum('total') ?? 0;
+        
+        $totalRevenue = $erpRevenue + $wooRevenue;
+        
+        // Production Costs
+        $productionCosts = ProductionOrder::whereBetween('created_at', [$dateFrom, $dateTo])
+            ->sum('actual_cost') ?? 0;
+        
+        // Purchase Costs
+        $purchaseCosts = PurchaseOrder::where('status', 'completed')
+            ->whereBetween('created_at', [$dateFrom, $dateTo])
+            ->sum('total_amount') ?? 0;
+        
+        // Payroll Costs
+        $payrollCosts = Payroll::where('status', 'paid')
+            ->whereBetween('period_start', [$dateFrom, $dateTo])
+            ->sum('total_amount') ?? 0;
+        
         $totalCosts = $productionCosts + $purchaseCosts + $payrollCosts;
         
         $netProfit = $totalRevenue - $totalCosts;
@@ -429,7 +463,7 @@ class AccountingDashboardController extends Controller
         
         return [
             'total_revenue' => $totalRevenue,
-            'erp_revenue' => $revenue,
+            'erp_revenue' => $erpRevenue,
             'woocommerce_revenue' => $wooRevenue,
             'production_costs' => $productionCosts,
             'purchase_costs' => $purchaseCosts,

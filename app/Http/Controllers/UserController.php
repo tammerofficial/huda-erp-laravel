@@ -12,11 +12,19 @@ class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
-     * Only show staff users (those with production_staff role)
+     * Only show management users (exclude staff and production_staff)
      */
     public function index()
     {
-        $users = User::role('production_staff')->with('employee')->paginate(15);
+        // Only show management users (exclude workers who have employee records)
+        // Show only users who are NOT employees and have management roles
+        $users = User::whereDoesntHave('employee') // Exclude users who have employee records (workers)
+            ->whereHas('roles', function($q) {
+                $q->whereIn('name', ['super_admin', 'admin', 'manager', 'accountant', 'purchasing_agent']);
+            })
+            ->with('roles')
+            ->paginate(15);
+        
         return view('users.index', compact('users'));
     }
 
@@ -25,7 +33,8 @@ class UserController extends Controller
      */
     public function create()
     {
-        return view('users.create');
+        $roles = \Spatie\Permission\Models\Role::whereNotIn('name', ['staff', 'production_staff'])->get();
+        return view('users.create', compact('roles'));
     }
 
     /**
@@ -37,6 +46,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
+            'role' => 'required|exists:roles,name',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
             'is_active' => 'boolean',
@@ -52,19 +62,8 @@ class UserController extends Controller
             'created_by' => auth()->id(),
         ]);
 
-        // Assign production_staff role
-        $user->assignRole('production_staff');
-
-        // Create employee record
-        Employee::create([
-            'user_id' => $user->id,
-            'employee_id' => 'EMP' . str_pad(Employee::count() + 1, 3, '0', STR_PAD_LEFT),
-            'phone' => $request->phone,
-            'address' => $request->address,
-            'position' => $request->position ?? 'Production Staff',
-            'department' => $request->department ?? 'Production',
-            'qr_code' => 'QR' . $user->id . time(),
-        ]);
+        // Assign role
+        $user->assignRole($request->role);
 
         return redirect()->route('users.index')->with('success', 'تم إنشاء المستخدم بنجاح');
     }
@@ -83,8 +82,9 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        $user->load('employee');
-        return view('users.edit', compact('user'));
+        $roles = \Spatie\Permission\Models\Role::whereNotIn('name', ['staff', 'production_staff'])->get();
+        $user->load('roles');
+        return view('users.edit', compact('user', 'roles'));
     }
 
     /**
@@ -96,6 +96,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|string|min:8|confirmed',
+            'role' => 'required|exists:roles,name',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
             'is_active' => 'boolean',
@@ -114,6 +115,9 @@ class UserController extends Controller
         }
 
         $user->update($userData);
+
+        // Sync role
+        $user->syncRoles([$request->role]);
 
         return redirect()->route('users.index')->with('success', 'تم تحديث المستخدم بنجاح');
     }

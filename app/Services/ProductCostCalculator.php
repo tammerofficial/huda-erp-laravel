@@ -7,6 +7,7 @@ use App\Models\ProductionStage;
 use App\Models\Employee;
 use App\Models\Setting;
 use App\Models\BomItem;
+use App\Models\ProductionLog;
 use Illuminate\Support\Facades\DB;
 
 class ProductCostCalculator
@@ -34,20 +35,28 @@ class ProductCostCalculator
     }
 
     /**
-     * Calculate labor cost based on actual production time and hourly rates
+     * Calculate labor cost using real production data
      */
     public function calculateLaborCost(Product $product, int $quantity = 1): float
     {
-        $averageTimeInHours = $this->getAverageLaborTimeForProduct($product);
-
-        if ($averageTimeInHours > 0) {
-            $averageHourlyRate = $this->getAverageHourlyRateForProduct($product);
-            return $averageTimeInHours * $averageHourlyRate * $quantity;
+        // Use actual production logs data
+        $logs = ProductionLog::where('product_id', $product->id)
+            ->where('quality_status', 'approved')
+            ->latest()
+            ->take(10) // Last 10 records
+            ->get();
+        
+        if ($logs->count() > 0) {
+            // Calculate average labor cost per piece from actual data
+            $avgLaborCostPerPiece = $logs->avg('earnings');
+            return $avgLaborCostPerPiece * $quantity;
         }
-
+        
         // Fallback to percentage-based calculation
         $materialCost = $this->calculateMaterialCost($product);
-        return $this->calculateLaborCostFromSettings($product, $materialCost);
+        $laborPercentage = Setting::get('labor_cost_percentage', 30) / 100;
+        
+        return $materialCost * $laborPercentage;
     }
 
     /**

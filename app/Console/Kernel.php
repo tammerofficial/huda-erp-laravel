@@ -29,6 +29,24 @@ class Kernel extends ConsoleKernel
             ->dailyAt('08:00')
             ->withoutOverlapping()
             ->onOneServer();
+
+        // Production workflow alerts
+        $schedule->command('alerts:check-low-stock')
+            ->hourly()
+            ->withoutOverlapping()
+            ->onOneServer();
+
+        // Generate monthly payroll on the 25th of each month
+        $schedule->command('payroll:generate-monthly')
+            ->monthlyOn(25, '09:00')
+            ->withoutOverlapping()
+            ->onOneServer();
+
+        // Daily production report
+        $schedule->command('reports:production-daily')
+            ->dailyAt('18:00')
+            ->withoutOverlapping()
+            ->onOneServer();
     }
 
     /**

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\SupplierController;
@@ -20,6 +21,10 @@ use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\AccountingDashboardController;
 use App\Http\Controllers\CostManagementController;
 use App\Http\Controllers\RoleManagementController;
+use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\ProductionLogController;
+use App\Http\Controllers\QualityCheckController;
+use App\Http\Controllers\QRController;
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -28,27 +33,55 @@ Route::get('login', function () {
     return view('auth.login');
 })->name('login');
 
+Route::post('login', function (Illuminate\Http\Request $request) {
+    $credentials = $request->validate([
+        'email' => 'required|email',
+        'password' => 'required',
+    ]);
+
+    if (Auth::attempt($credentials, $request->boolean('remember'))) {
+        $request->session()->regenerate();
+        return redirect()->intended('/');
+    }
+
+    return back()->withErrors([
+        'email' => 'The provided credentials do not match our records.',
+    ])->onlyInput('email');
+})->name('login.post');
+
 Route::post('logout', function () {
     auth()->logout();
     return redirect('/');
 })->name('logout');
 
 // Employee Routes
-Route::resource('employees', EmployeeController::class);
-Route::post('employees/{employee}/generate-qr', [EmployeeController::class, 'generateQR'])->name('employees.generate-qr');
+Route::middleware(['permission:employees.view'])->group(function () {
+    Route::resource('employees', EmployeeController::class);
+    Route::post('employees/{employee}/generate-qr', [EmployeeController::class, 'generateQR'])->name('employees.generate-qr');
+    Route::post('employees/generate-all-qr', [EmployeeController::class, 'generateAllQR'])->name('employees.generate-all-qr');
+    Route::post('employees/{employee}/toggle-qr', [EmployeeController::class, 'toggleQR'])->name('employees.toggle-qr');
+});
 
 // Customer Routes
-Route::resource('customers', CustomerController::class);
+Route::middleware(['permission:customers.view'])->group(function () {
+    Route::resource('customers', CustomerController::class);
+});
 
 // Supplier Routes
-Route::resource('suppliers', SupplierController::class);
+Route::middleware(['permission:suppliers.view'])->group(function () {
+    Route::resource('suppliers', SupplierController::class);
+});
 
 // Product Routes
-Route::resource('products', ProductController::class);
-Route::get('products/{product}/bom/create', [ProductController::class, 'createBOM'])->name('products.bom.create');
-Route::post('products/{product}/bom', [ProductController::class, 'storeBOM'])->name('products.bom.store');
-Route::post('products/{product}/calculate-cost', [ProductController::class, 'calculateCost'])->name('products.calculate-cost');
-Route::post('products/{product}/update-pricing', [ProductController::class, 'updatePricing'])->name('products.update-pricing');
+Route::middleware(['permission:products.view'])->group(function () {
+    Route::resource('products', ProductController::class);
+});
+Route::middleware(['permission:products.edit'])->group(function () {
+    Route::get('products/{product}/bom/create', [ProductController::class, 'createBOM'])->name('products.bom.create');
+    Route::post('products/{product}/bom', [ProductController::class, 'storeBOM'])->name('products.bom.store');
+    Route::post('products/{product}/calculate-cost', [ProductController::class, 'calculateCost'])->name('products.calculate-cost');
+    Route::post('products/{product}/update-pricing', [ProductController::class, 'updatePricing'])->name('products.update-pricing');
+});
 
 // Bill of Materials (BOM) Routes - Independent Management
 Route::resource('bom', BillOfMaterialController::class)->parameters(['bom' => 'billOfMaterial']);
@@ -124,12 +157,14 @@ Route::prefix('cost-management')->name('cost-management.')->group(function () {
 // WooCommerce Integration
 Route::post('woocommerce/sync', [OrderController::class, 'syncFromWooCommerce'])->name('woocommerce.sync');
 
-// User Routes (Staff only)
-Route::resource('users', UserController::class);
-Route::post('users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
+// User Routes (Management team only)
+Route::middleware(['permission:users.view'])->group(function () {
+    Route::resource('users', UserController::class);
+    Route::post('users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
+});
 
 // Role Management Routes (Management team only)
-Route::prefix('roles')->name('roles.')->group(function () {
+Route::prefix('roles')->name('roles.')->middleware(['permission:roles.view'])->group(function () {
     Route::get('/', [RoleManagementController::class, 'index'])->name('index');
     Route::get('create', [RoleManagementController::class, 'create'])->name('create');
     Route::post('/', [RoleManagementController::class, 'store'])->name('store');
@@ -170,6 +205,63 @@ Route::get('reports/profitability', function () {
     
     return view('reports.profitability', compact('summary', 'profitableOrders', 'startDate', 'endDate'));
 })->name('reports.profitability');
+
+// Attendance Routes
+Route::resource('attendance', AttendanceController::class);
+Route::post('attendance/bulk-check-in', [AttendanceController::class, 'bulkCheckIn'])->name('attendance.bulk-check-in');
+Route::post('attendance/bulk-check-out', [AttendanceController::class, 'bulkCheckOut'])->name('attendance.bulk-check-out');
+Route::get('attendance/report/{month}', [AttendanceController::class, 'monthlyReport'])->name('attendance.monthly-report');
+
+// Production Logs Routes
+Route::resource('production-logs', ProductionLogController::class);
+Route::post('production-logs/{log}/complete', [ProductionLogController::class, 'complete'])->name('production-logs.complete');
+Route::post('production-logs/{log}/approve', [ProductionLogController::class, 'approve'])->name('production-logs.approve');
+Route::post('production-logs/{log}/reject', [ProductionLogController::class, 'reject'])->name('production-logs.reject');
+
+// Quality Check Routes
+Route::resource('quality-checks', QualityCheckController::class);
+Route::get('quality-checks/inspect/{productionOrder}', [QualityCheckController::class, 'inspect'])->name('quality-checks.inspect');
+Route::post('quality-checks/inspect/{productionOrder}', [QualityCheckController::class, 'submitInspection'])->name('quality-checks.submit-inspection');
+
+// QR Code Routes
+Route::post('api/qr/validate', [QRController::class, 'validate'])->name('qr.validate');
+Route::post('api/qr/check-in', [QRController::class, 'checkIn'])->name('qr.check-in');
+Route::post('api/qr/check-out', [QRController::class, 'checkOut'])->name('qr.check-out');
+Route::post('api/qr/start-stage', [QRController::class, 'startStage'])->name('qr.start-stage');
+Route::post('api/qr/complete-stage', [QRController::class, 'completeStage'])->name('qr.complete-stage');
+Route::get('qr-scanner', function () {
+    return view('qr-scanner');
+})->name('qr.scanner');
+
+// PDF/Excel Export Routes
+Route::get('exports/invoice/{invoice}/pdf', function($invoice) {
+    $service = app(\App\Services\PDFExportService::class);
+    return $service->generateInvoice($invoice);
+})->name('exports.invoice.pdf');
+
+Route::get('exports/payslip/{payroll}/pdf', function($payroll) {
+    $service = app(\App\Services\PDFExportService::class);
+    return $service->generatePayslip($payroll);
+})->name('exports.payslip.pdf');
+
+Route::get('exports/attendance/{month}/{year}/pdf', function($month, $year) {
+    $service = app(\App\Services\PDFExportService::class);
+    return $service->generateAttendanceReport($month, $year);
+})->name('exports.attendance.pdf');
+
+Route::get('exports/attendance/{month}/{year}/excel', function($month, $year) {
+    return \Maatwebsite\Excel\Facades\Excel::download(
+        new \App\Exports\AttendanceExport($month, $year),
+        'attendance-' . $month . '-' . $year . '.xlsx'
+    );
+})->name('exports.attendance.excel');
+
+Route::get('exports/payroll/{month}/{year}/excel', function($month, $year) {
+    return \Maatwebsite\Excel\Facades\Excel::download(
+        new \App\Exports\PayrollExport($month, $year),
+        'payroll-' . $month . '-' . $year . '.xlsx'
+    );
+})->name('exports.payroll.excel');
 
 // Settings Routes
 Route::get('settings', [SettingsController::class, 'index'])->name('settings');
