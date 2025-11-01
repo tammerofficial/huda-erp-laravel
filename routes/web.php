@@ -27,9 +27,27 @@ Route::get('login', function () {
     return view('auth.login');
 })->name('login');
 
+Route::post('login', function () {
+    $credentials = request()->validate([
+        'email' => 'required|email',
+        'password' => 'required',
+    ]);
+
+    if (auth()->attempt($credentials)) {
+        request()->session()->regenerate();
+        return redirect()->intended('/');
+    }
+
+    return back()->withErrors([
+        'email' => 'The provided credentials do not match our records.',
+    ])->onlyInput('email');
+})->name('login.post');
+
 Route::post('logout', function () {
     auth()->logout();
-    return redirect('/');
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+    return redirect('/login');
 })->name('logout');
 
 // Employee Routes
@@ -97,6 +115,10 @@ Route::get('accounting/advanced-dashboard', [AccountingDashboardController::clas
 Route::get('accounting/journal', [AccountingController::class, 'journalEntries'])->name('accounting.journal.index');
 Route::get('accounting/journal/create', [AccountingController::class, 'createJournalEntry'])->name('accounting.journal.create');
 Route::post('accounting/journal', [AccountingController::class, 'storeJournalEntry'])->name('accounting.journal.store');
+Route::get('accounting/journal/{entry}', [AccountingController::class, 'showJournalEntry'])->name('accounting.journal.show');
+Route::get('accounting/journal/{entry}/edit', [AccountingController::class, 'editJournalEntry'])->name('accounting.journal.edit');
+Route::put('accounting/journal/{entry}', [AccountingController::class, 'updateJournalEntry'])->name('accounting.journal.update');
+Route::delete('accounting/journal/{entry}', [AccountingController::class, 'destroyJournalEntry'])->name('accounting.journal.destroy');
 Route::get('accounting/reports', [AccountingController::class, 'reports'])->name('accounting.reports');
 Route::resource('accounting', AccountingController::class);
 
@@ -137,7 +159,53 @@ Route::get('reports/inventory', function () {
 })->name('reports.inventory');
 
 Route::get('reports/production', function () {
-    return view('reports.production');
+    $totalOrders = \App\Models\Order::count();
+    $completedOrders = \App\Models\Order::where('status', 'completed')->count();
+    $inProgressOrders = \App\Models\Order::where('status', 'in-production')->count();
+    $pendingOrders = \App\Models\Order::where('status', 'on-hold')->count();
+    
+    $totalProductionOrders = \App\Models\ProductionOrder::count();
+    $completedProductionOrders = \App\Models\ProductionOrder::where('status', 'completed')->count();
+    $inProgressProductionOrders = \App\Models\ProductionOrder::where('status', 'in-progress')->count();
+    $pendingProductionOrders = \App\Models\ProductionOrder::where('status', 'pending')->count();
+    
+    $totalRevenue = \App\Models\Order::where('status', 'completed')->sum('total_amount');
+    $totalCosts = \App\Models\ProductionOrder::where('status', 'completed')->sum('actual_cost');
+    $profit = $totalRevenue - $totalCosts;
+    
+    // Calculate efficiency (completed orders / total orders * 100)
+    $efficiency = $totalOrders > 0 ? round(($completedOrders / $totalOrders) * 100, 2) : 0;
+    
+    // Get production orders for the table
+    $productionOrders = \App\Models\ProductionOrder::with(['product', 'order', 'productionStages'])->latest()->paginate(10);
+    
+    // Get production stages for the table
+    $stages = \App\Models\ProductionStage::with(['productionOrder', 'employee.user'])->latest()->take(10)->get();
+    
+    // Get employee performance data
+    $employeePerformance = \App\Models\Employee::with(['user'])
+        ->whereHas('productionStages')
+        ->get()
+        ->map(function ($employee) {
+            $totalStages = $employee->productionStages->count();
+            $completedStages = $employee->productionStages->where('status', 'completed')->count();
+            $completionRate = $totalStages > 0 ? round(($completedStages / $totalStages) * 100, 2) : 0;
+            $averageDuration = $employee->productionStages->where('status', 'completed')->avg('duration_minutes') ?? 0;
+            
+            return (object) [
+                'name' => $employee->user->name,
+                'total_stages' => $totalStages,
+                'completed_stages' => $completedStages,
+                'completion_rate' => $completionRate,
+                'average_duration' => round($averageDuration, 2)
+            ];
+        });
+    
+    return view('reports.production', compact(
+        'totalOrders', 'completedOrders', 'inProgressOrders', 'pendingOrders',
+        'totalProductionOrders', 'completedProductionOrders', 'inProgressProductionOrders', 'pendingProductionOrders',
+        'totalRevenue', 'totalCosts', 'profit', 'efficiency', 'productionOrders', 'stages', 'employeePerformance'
+    ));
 })->name('reports.production');
 
 Route::get('reports/profitability', function () {

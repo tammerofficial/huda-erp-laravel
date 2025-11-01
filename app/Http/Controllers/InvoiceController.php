@@ -17,7 +17,7 @@ class InvoiceController extends Controller
 
     public function create()
     {
-        $orders = Order::where('status', 'completed')->whereDoesntHave('invoice')->with('customer')->get();
+        $orders = Order::whereIn('status', ['completed', 'on-hold'])->whereDoesntHave('invoices')->with('customer')->get();
         return view('invoices.create', compact('orders'));
     }
 

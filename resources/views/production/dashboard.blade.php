@@ -387,15 +387,18 @@ function workshopDashboard() {
                     })
                 });
 
-                if (response.ok) {
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
                     await this.refreshData();
                     this.assignModal.show = false;
-                    // Show success message
-                    alert('Task assigned successfully!');
+                    alert(result.message || 'Task assigned successfully!');
+                } else {
+                    alert(result.message || 'Failed to assign task');
                 }
             } catch (error) {
                 console.error('Failed to assign task:', error);
-                alert('Failed to assign task');
+                alert('Failed to assign task: ' + error.message);
             }
         },
 

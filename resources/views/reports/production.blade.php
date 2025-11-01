@@ -156,8 +156,8 @@
                                     <td>{{ $order->end_date ? $order->end_date->format('Y-m-d') : 'Not Completed' }}</td>
                                     <td>
                                         @php
-                                            $completedStages = $order->stages->where('status', 'completed')->count();
-                                            $totalStages = $order->stages->count();
+                                            $completedStages = $order->productionStages->where('status', 'completed')->count();
+                                            $totalStages = $order->productionStages->count();
                                             $progress = $totalStages > 0 ? ($completedStages / $totalStages) * 100 : 0;
                                         @endphp
                                         <div class="progress">

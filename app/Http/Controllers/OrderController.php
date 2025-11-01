@@ -33,11 +33,11 @@ class OrderController extends Controller
             'order_date' => 'required|date',
             'status' => 'required|in:pending,on-hold,in-production,completed,cancelled,delivered',
             'payment_status' => 'required|in:pending,partial,paid,overdue',
-            'payment_type' => 'nullable|in:cash,credit,bank_transfer,card',
+            'payment_method' => 'nullable|in:cash,credit,bank_transfer,card',
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
-            'items.*.unit_price' => 'required|numeric|min:0',
+            'items.*.unit_price' => 'nullable|numeric|min:0',
             'shipping_address' => 'nullable|string',
             'notes' => 'nullable|string',
         ]);
@@ -48,7 +48,9 @@ class OrderController extends Controller
         // Calculate totals
         $totalAmount = 0;
         foreach ($validated['items'] as $item) {
-            $totalAmount += $item['quantity'] * $item['unit_price'];
+            // If no unit_price provided, get it from product
+            $unitPrice = $item['unit_price'] ?? Product::find($item['product_id'])->price;
+            $totalAmount += $item['quantity'] * $unitPrice;
         }
 
         // Create order
@@ -60,7 +62,7 @@ class OrderController extends Controller
             'final_amount' => $totalAmount,
             'status' => $validated['status'],
             'payment_status' => $validated['payment_status'],
-            'payment_type' => $validated['payment_type'],
+            'payment_type' => $validated['payment_method'] ?? null,
             'shipping_address' => $validated['shipping_address'] ?? null,
             'notes' => $validated['notes'] ?? null,
             'created_by' => auth()->id() ?? 1,
@@ -68,11 +70,14 @@ class OrderController extends Controller
 
         // Create order items
         foreach ($validated['items'] as $item) {
+            $product = Product::find($item['product_id']);
+            $unitPrice = $item['unit_price'] ?? $product->price;
+            
             $order->orderItems()->create([
                 'product_id' => $item['product_id'],
                 'quantity' => $item['quantity'],
-                'unit_price' => $item['unit_price'],
-                'total_price' => $item['quantity'] * $item['unit_price'],
+                'unit_price' => $unitPrice,
+                'total_price' => $item['quantity'] * $unitPrice,
             ]);
         }
 
@@ -100,10 +105,16 @@ class OrderController extends Controller
         $validated = $request->validate([
             'status' => 'required|in:pending,on-hold,in-production,completed,cancelled,delivered',
             'payment_status' => 'required|in:pending,partial,paid,overdue',
-            'payment_type' => 'nullable|in:cash,credit,bank_transfer,card',
+            'payment_method' => 'nullable|in:cash,credit,bank_transfer,card',
             'delivery_date' => 'nullable|date',
             'notes' => 'nullable|string',
         ]);
+
+        // Map payment_method to payment_type for database
+        if (isset($validated['payment_method'])) {
+            $validated['payment_type'] = $validated['payment_method'];
+            unset($validated['payment_method']);
+        }
 
         $order->update($validated);
 

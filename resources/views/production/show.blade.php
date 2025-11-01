@@ -6,6 +6,34 @@
 @section('content')
 <div x-data="productionDetails()">
     <div class="max-w-7xl mx-auto">
+        <!-- Success/Error Messages -->
+        @if(session('success'))
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6" role="alert">
+                <div class="flex">
+                    <div class="py-1">
+                        <i class="fas fa-check-circle mr-2"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold">Success!</p>
+                        <p class="text-sm">{{ session('success') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6" role="alert">
+                <div class="flex">
+                    <div class="py-1">
+                        <i class="fas fa-exclamation-circle mr-2"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold">Error!</p>
+                        <p class="text-sm">{{ session('error') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
         <!-- Header -->
         <div class="bg-white rounded-lg shadow-sm border p-6 mb-6">
             <div class="flex items-center justify-between">
@@ -144,7 +172,7 @@
                 Production Stages
             </h3>
             
-            @if($production->stages->count() > 0)
+            @if($production->productionStages->count() > 0)
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
@@ -159,7 +187,7 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach($production->stages as $stage)
+                            @foreach($production->productionStages as $stage)
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $stage->stage_name }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $stage->employee ? $stage->employee->user->name : 'Not assigned' }}</td>
@@ -183,7 +211,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     @if($stage->status == 'pending')
-                                        <form action="{{ route('productions.start-stage', $stage) }}" method="POST" class="inline-block">
+                                        <form action="{{ route('production-stages.start', $stage) }}" method="POST" class="inline-block">
                                             @csrf
                                             <div class="flex items-center space-x-2 space-x-reverse">
                                                 <select name="employee_id" class="text-sm border border-gray-300 rounded px-2 py-1" required>
@@ -199,7 +227,7 @@
                                             </div>
                                         </form>
                                     @elseif($stage->status == 'in-progress')
-                                        <form action="{{ route('productions.complete-stage', $stage) }}" method="POST" class="inline-block" 
+                                        <form action="{{ route('production-stages.complete', $stage) }}" method="POST" class="inline-block" 
                                               onsubmit="return confirm('Are you sure you want to complete this stage?')">
                                             @csrf
                                             <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm">

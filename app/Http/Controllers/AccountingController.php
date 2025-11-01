@@ -11,7 +11,7 @@ class AccountingController extends Controller
 {
     public function index()
     {
-        $accountings = Accounting::with('creator')->paginate(15);
+        $accountings = Accounting::with('createdBy')->paginate(15);
         return view('accounting.index', compact('accountings'));
     }
 
@@ -48,7 +48,7 @@ class AccountingController extends Controller
 
     public function show(Accounting $accounting)
     {
-        $accounting->load('creator');
+        $accounting->load('createdBy');
         return view('accounting.show', compact('accounting'));
     }
 
@@ -79,7 +79,7 @@ class AccountingController extends Controller
 
     public function journalEntries()
     {
-        $entries = JournalEntry::with('creator')->paginate(15);
+        $entries = JournalEntry::with('createdBy')->paginate(15);
         return view('accounting.journal.index', compact('entries'));
     }
 
@@ -130,5 +130,38 @@ class AccountingController extends Controller
         ->get();
 
         return view('accounting.reports', compact('revenue', 'expenses', 'profit', 'monthlyData'));
+    }
+
+    public function showJournalEntry(JournalEntry $entry)
+    {
+        $entry->load('createdBy');
+        return view('accounting.journal.show', compact('entry'));
+    }
+
+    public function editJournalEntry(JournalEntry $entry)
+    {
+        return view('accounting.journal.edit', compact('entry'));
+    }
+
+    public function updateJournalEntry(Request $request, JournalEntry $entry)
+    {
+        $request->validate([
+            'entry_date' => 'required|date',
+            'description' => 'required|string|max:255',
+            'debit_account' => 'required|string|max:100',
+            'credit_account' => 'required|string|max:100',
+            'amount' => 'required|numeric|min:0.01',
+            'reference_type' => 'nullable|string|max:100',
+            'reference_id' => 'nullable|integer',
+        ]);
+
+        $entry->update($request->all());
+        return redirect()->route('accounting.journal.index')->with('success', 'Journal entry updated successfully');
+    }
+
+    public function destroyJournalEntry(JournalEntry $entry)
+    {
+        $entry->delete();
+        return redirect()->route('accounting.journal.index')->with('success', 'Journal entry deleted successfully');
     }
 }

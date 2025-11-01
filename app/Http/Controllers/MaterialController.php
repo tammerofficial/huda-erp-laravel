@@ -52,7 +52,7 @@ class MaterialController extends Controller
 
     public function show(Material $material)
     {
-        $material->load(['supplier', 'inventories.warehouse', 'bomItems.bom.product']);
+        $material->load(['supplier', 'inventories.warehouse', 'bomItems.billOfMaterial.product']);
         return view('materials.show', compact('material'));
     }
 

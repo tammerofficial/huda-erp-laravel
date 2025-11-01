@@ -138,11 +138,70 @@ class ProductionController extends Controller
             'employee_id' => 'required|exists:employees,id',
         ]);
 
-        $stage->update([
-            'employee_id' => $request->employee_id,
+        try {
+            $stage->update([
+                'employee_id' => $request->employee_id,
+                'status' => 'in-progress',
+                'start_time' => now(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Task assigned successfully to ' . $stage->employee->user->name
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to assign task: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Start stage
+     */
+    public function startStage(Request $request, ProductionStage $stage)
+    {
+        $request->validate([
+            'employee_id' => 'required|exists:employees,id',
         ]);
 
-        return response()->json(['success' => true]);
+        try {
+            $stage->update([
+                'status' => 'in-progress',
+                'start_time' => now(),
+                'employee_id' => $request->employee_id,
+            ]);
+
+            return redirect()->back()->with('success', 'Stage started successfully');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to start stage: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Complete stage
+     */
+    public function completeStage(Request $request, ProductionStage $stage)
+    {
+        $request->validate([
+            'notes' => 'nullable|string',
+            'quality_checks' => 'nullable|array',
+        ]);
+
+        try {
+            $stage->update([
+                'status' => 'completed',
+                'end_time' => now(),
+                'duration_minutes' => $stage->start_time ? $stage->start_time->diffInMinutes(now()) : null,
+                'notes' => $request->notes,
+                'quality_checks' => $request->quality_checks,
+            ]);
+
+            return redirect()->back()->with('success', 'Stage completed successfully');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to complete stage: ' . $e->getMessage());
+        }
     }
 
     public function create()
@@ -252,29 +311,5 @@ class ProductionController extends Controller
         return redirect()->route('productions.index')->with('success', 'Production order deleted successfully');
     }
 
-    public function startStage(Request $request, ProductionStage $stage)
-    {
-        $request->validate([
-            'employee_id' => 'required|exists:employees,id',
-        ]);
 
-        $stage->update([
-            'status' => 'in-progress',
-            'start_time' => now(),
-            'employee_id' => $request->employee_id,
-        ]);
-
-        return redirect()->back()->with('success', 'Stage started successfully');
-    }
-
-    public function completeStage(ProductionStage $stage)
-    {
-        $stage->update([
-            'status' => 'completed',
-            'end_time' => now(),
-            'duration_minutes' => $stage->start_time ? $stage->start_time->diffInMinutes(now()) : 0,
-        ]);
-
-        return redirect()->back()->with('success', 'Stage completed successfully');
-    }
 }

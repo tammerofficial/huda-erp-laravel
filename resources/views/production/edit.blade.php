@@ -11,7 +11,7 @@
                     <h3 class="text-2xl font-bold text-gray-900">Edit Production Order: {{ $production->production_number }}</h3>
                 </div>
                 <div class="">
-                    <form action="{{ route('production.update', $production) }}" method="POST">
+                    <form action="{{ route('productions.update', $production) }}" method="POST">
                         @csrf
                         @method('PUT')
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -100,7 +100,7 @@
                             <button type="submit" class="btn-primary">
                                 <i class="fas fa-save"></i> Save Changes
                             </button>
-                            <a href="{{ route('production.index') }}" class="btn-secondary">
+                            <a href="{{ route('productions.index') }}" class="btn-secondary">
                                 <i class="fas fa-times"></i> Cancel
                             </a>
                         </div>

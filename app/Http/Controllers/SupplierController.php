@@ -28,7 +28,7 @@ class SupplierController extends Controller
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
             'city' => 'nullable|string',
-            'country' => 'string|default:Kuwait',
+            'country' => 'nullable|string',
             'tax_number' => 'nullable|string',
             'payment_terms' => 'nullable|string',
             'credit_limit' => 'numeric|min:0',
@@ -36,7 +36,12 @@ class SupplierController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        Supplier::create($request->all());
+        $data = $request->all();
+        if (empty($data['country'])) {
+            $data['country'] = 'Kuwait';
+        }
+
+        Supplier::create($data);
         return redirect()->route('suppliers.index')->with('success', 'Supplier created successfully');
     }
 
