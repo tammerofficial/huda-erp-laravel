@@ -1,7 +1,7 @@
 # cPanel Deployment Configuration
-# Version: v1.0.1
+# Version: v1.0.2
 # Description: Automatic deployment script for Huda ERP Laravel to cPanel/Hostinger
-# Changes: Fixed .htaccess deployment and improved database migration handling
+# Changes: Fixed .htaccess deployment, added file protection, and improved database migration handling
 # Last Updated: 2025-01-XX
 
 deployment:
@@ -57,16 +57,19 @@ deployment:
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# Protect sensitive files from direct access
+<FilesMatch "^(\.env|\.git|composer\.(json|lock)|package(-lock)?\.json|\.cpanel\.yml|\.md|\.sh|update_.*\.php)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
 HTACCESS
     - chmod 644 .htaccess
-    # Create .htaccess to protect sensitive files (optional security)
-    - cat > .htaccess-protect << 'HTACCESS_PROTECT'
-# Protect sensitive files
-<FilesMatch "^(\.env|\.git|composer\.(json|lock)|package(-lock)?\.json|\.cpanel\.yml|\.md)$">
-    Order allow,deny
-    Deny from all
-</FilesMatch>
-HTACCESS_PROTECT
     - test -f .env || cp .env.example .env 2>/dev/null || touch .env
     - sed -i 's/DB_CONNECTION=msyql/DB_CONNECTION=mysql/g' .env
     - sed -i 's/DB_CONNECTION=msql/DB_CONNECTION=mysql/g' .env
