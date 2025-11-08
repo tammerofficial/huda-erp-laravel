@@ -1,0 +1,26 @@
+{
+  "app": {
+    "name": "my-awesome-app",
+    "url": "https://myapp.com",
+    "env": "production",
+    "debug": true
+  },
+  "database": {
+    "host": "127.0.0.1",
+    "port": 3306,
+    "database": "myapp_db",
+    "username": "myapp_user",
+    "password": "secure_password_123"
+  },
+  "cpanel": {
+    "host": "123.45.67.89",
+    "user": "myapp_user",
+    "password": "cpanel_password",
+    "port": 22,
+    "repo_path": "/home/myapp_user/public_html"
+  },
+  "github": {
+    "secret_name": "MYAPP_CPANEL_SECRET"
+  }
+}
+

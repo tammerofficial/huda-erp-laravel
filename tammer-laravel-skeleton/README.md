@@ -14,71 +14,82 @@ Laravel Skeleton جاهز للنشر التلقائي على cPanel مع Tailwin
 
 ## 🎯 الاستخدام
 
-### الطريقة 1: استخدام Installer Script
+### الطريقة 1: استخدام Installer Script (موصى به)
 
 ```bash
 # 1. انسخ الملفات إلى مشروعك الجديد
 cp -r tammer-laravel-skeleton/* /path/to/your/new-project/
 cp -r tammer-laravel-skeleton/.github /path/to/your/new-project/
 
-# 2. شغّل Installer
+# 2. انسخ ملف Config واملأه
+cp deploy.config.json.example deploy.config.json
+# عدّل deploy.config.json ببيانات مشروعك
+
+# 3. شغّل Installer
 cd /path/to/your/new-project
-chmod +x install.sh
-./install.sh
+bash install.sh
 ```
 
-الـ Installer سيسألك عن:
-- APP_NAME
-- APP_URL
-- DB_DATABASE
-- DB_USERNAME
-- DB_PASSWORD
-- GitHub Secret name
+**ملف `deploy.config.json` يحتوي على جميع المتغيرات:**
+- ✅ APP_NAME, APP_URL
+- ✅ Database credentials
+- ✅ cPanel connection info
+- ✅ GitHub Secret name
 
-### الطريقة 2: يدوياً (3 متغيرات فقط)
+الـ Installer يقرأ `deploy.config.json` ويُعدّل جميع الملفات تلقائياً!
 
-#### 1. في `.cpanel.yml.template` (أعد تسميته إلى `.cpanel.yml`):
+### الطريقة 2: يدوياً (ملف config واحد)
 
-**السطر 102:** `APP_NAME`
-```yaml
-APP_NAME=your_app_name
-```
+1. **انسخ ملف Config:**
+   ```bash
+   cp deploy.config.json.example deploy.config.json
+   ```
 
-**السطر 110:** `APP_URL`
-```yaml
-APP_URL=https://your-domain.com
-```
+2. **املأ `deploy.config.json` ببيانات مشروعك:**
+   ```json
+   {
+     "app": {
+       "name": "my-app",
+       "url": "https://myapp.com"
+     },
+     "database": {
+       "database": "my_db",
+       "username": "my_user",
+       "password": "my_password"
+     },
+     "cpanel": {
+       "host": "123.45.67.89",
+       "user": "my_user",
+       "password": "cpanel_pass",
+       "repo_path": "/home/my_user/public_html"
+     },
+     "github": {
+       "secret_name": "MYAPP_CPANEL_SECRET"
+     }
+   }
+   ```
 
-**السطور 140-144:** بيانات قاعدة البيانات
-```yaml
-DB_DATABASE=your_database_name
-DB_USERNAME=your_database_user
-DB_PASSWORD="your_database_password"
-```
+3. **شغّل Installer:**
+   ```bash
+   bash install.sh
+   ```
 
-#### 2. في `.github/workflows/deploy-cpanel.yml.template` (أعد تسميته):
-
-**السطر 25:** اسم Secret
-```yaml
-${{ secrets.YOUR_PROJECT_CPANEL_SECRET }}
-```
-
-#### 3. أضف GitHub Secret (انظر `setup-github-secrets.md`)
+4. **أضف GitHub Secret (انظر `GITHUB_SECRETS_INSTRUCTIONS.txt`)
 
 ## 📁 هيكل الملفات
 
 ```
 tammer-laravel-skeleton/
-├── .cpanel.yml.template          # Template للنشر (يُنسخ ويُعدّل)
+├── .cpanel.yml.template          # Template للنشر (يُعدّل تلقائياً)
 ├── .github/
 │   └── workflows/
 │       └── deploy-cpanel.yml.template  # GitHub Actions template
 ├── tailwind.config.js           # ✅ جاهز
 ├── postcss.config.js             # ✅ جاهز
 ├── vite.config.js                # ✅ جاهز
-├── package.json                  # ✅ جاهز
-├── composer.json                 # ✅ جاهز
-├── install.sh                    # Installer script
+├── deploy.config.json.example    # مثال لملف Config
+├── deploy.config.json            # ⭐ ملف Config الرئيسي (املأه ببياناتك)
+├── install.sh                    # Installer script (يقرأ deploy.config.json)
 ├── README.md                     # هذا الملف
 └── setup-github-secrets.md      # دليل GitHub Secrets
 ```
@@ -92,19 +103,31 @@ cp -r tammer-laravel-skeleton/* /path/to/new-project/
 cp -r tammer-laravel-skeleton/.github /path/to/new-project/
 ```
 
-### 2. تشغيل Installer
+### 2. إعداد ملف Config
 
 ```bash
 cd /path/to/new-project
-chmod +x install.sh
-./install.sh
+cp deploy.config.json.example deploy.config.json
+# عدّل deploy.config.json ببيانات مشروعك
 ```
 
-### 3. إعداد GitHub Secrets
+### 3. تشغيل Installer
 
-انظر `setup-github-secrets.md`
+```bash
+bash install.sh
+```
 
-### 4. إعداد cPanel Git Repository
+الـ Installer سيقوم بـ:
+- ✅ قراءة `deploy.config.json`
+- ✅ إنشاء `.cpanel.yml` مع جميع القيم
+- ✅ إنشاء `.github/workflows/deploy-cpanel.yml`
+- ✅ إنشاء `GITHUB_SECRETS_INSTRUCTIONS.txt`
+
+### 4. إعداد GitHub Secrets
+
+انظر `GITHUB_SECRETS_INSTRUCTIONS.txt` (تم إنشاؤه تلقائياً)
+
+### 5. إعداد cPanel Git Repository
 
 1. `cPanel » Files » Git Version Control`
 2. `Create` → املأ البيانات
@@ -113,12 +136,12 @@ chmod +x install.sh
 ## ✅ Checklist
 
 - [ ] نسخ الملفات إلى المشروع الجديد
-- [ ] تشغيل `install.sh` أو تعديل يدوي
-- [ ] تحديث `.cpanel.yml` (APP_NAME, APP_URL, DB credentials)
-- [ ] تحديث `.github/workflows/deploy-cpanel.yml` (Secret name)
-- [ ] إضافة GitHub Secret
+- [ ] نسخ `deploy.config.json.example` إلى `deploy.config.json`
+- [ ] ملء `deploy.config.json` ببيانات مشروعك
+- [ ] تشغيل `bash install.sh`
+- [ ] إضافة GitHub Secret (انظر `GITHUB_SECRETS_INSTRUCTIONS.txt`)
 - [ ] إعداد cPanel Git Repository
-- [ ] `npm install` (إذا لم يفعله installer)
+- [ ] `npm install` (في المشروع الجديد)
 - [ ] `git push origin main` → نشر تلقائي! 🎉
 
 ## 🎨 Tailwind CSS

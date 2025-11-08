@@ -1,0 +1,26 @@
+{
+  "app": {
+    "name": "YOUR_APP_NAME",
+    "url": "https://your-domain.com",
+    "env": "production",
+    "debug": true
+  },
+  "database": {
+    "host": "127.0.0.1",
+    "port": 3306,
+    "database": "your_database_name",
+    "username": "your_database_user",
+    "password": "your_database_password"
+  },
+  "cpanel": {
+    "host": "your_server_ip",
+    "user": "your_cpanel_username",
+    "password": "your_cpanel_password",
+    "port": 22,
+    "repo_path": "/home/your_username/public_html"
+  },
+  "github": {
+    "secret_name": "YOUR_PROJECT_CPANEL_SECRET"
+  }
+}
+

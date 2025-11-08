@@ -1,76 +1,78 @@
-# ⚡ Quick Start Guide
+# ⚡ Quick Start Guide - 3 خطوات فقط!
 
-## 🚀 للمشاريع الجديدة - 3 خطوات فقط!
+## 🎯 الخطوات
 
-### الخطوة 1: نسخ الملفات
+### 1️⃣ نسخ الملفات
 
 ```bash
-# انسخ Skeleton إلى مشروعك الجديد
 cp -r tammer-laravel-skeleton/* /path/to/your/new-project/
 cp -r tammer-laravel-skeleton/.github /path/to/your/new-project/
 ```
 
-### الخطوة 2: تشغيل Installer
+### 2️⃣ إعداد ملف Config
 
 ```bash
 cd /path/to/your/new-project
-bash install.sh  # أو ./install.sh على Linux/Mac
+cp deploy.config.json.example deploy.config.json
 ```
 
-الـ Installer سيسألك:
-- ✅ APP_NAME
-- ✅ APP_URL
-- ✅ DB_DATABASE
-- ✅ DB_USERNAME
-- ✅ DB_PASSWORD
-- ✅ GitHub Secret name
+**عدّل `deploy.config.json`:**
 
-### الخطوة 3: إضافة GitHub Secret
-
-1. اذهب إلى: `Repository » Settings » Secrets and variables » Actions`
-2. أضف Environment: `your-project-name cpanel`
-3. أضف Secret بالاسم الذي أدخلته في Installer
-4. محتوى Secret:
+```json
+{
+  "app": {
+    "name": "my-app",                    // ⬅️ غيّر هذا
+    "url": "https://myapp.com"           // ⬅️ غيّر هذا
+  },
+  "database": {
+    "database": "my_db",                  // ⬅️ غيّر هذا
+    "username": "my_user",               // ⬅️ غيّر هذا
+    "password": "my_password"           // ⬅️ غيّر هذا
+  },
+  "cpanel": {
+    "host": "123.45.67.89",              // ⬅️ غيّر هذا
+    "user": "my_user",                   // ⬅️ غيّر هذا
+    "password": "cpanel_pass",           // ⬅️ غيّر هذا
+    "repo_path": "/home/my_user/public_html"  // ⬅️ غيّر هذا
+  },
+  "github": {
+    "secret_name": "MYAPP_CPANEL_SECRET"  // ⬅️ غيّر هذا
+  }
+}
 ```
-CPANEL_HOST=your_server_ip
-CPANEL_USER=your_cpanel_username
-CPANEL_PASSWORD=your_cpanel_password
-CPANEL_PORT=22
-CPANEL_REPO_PATH=/home/your_username/public_html
+
+### 3️⃣ تشغيل Installer
+
+```bash
+bash install.sh
 ```
 
-### ✅ انتهى!
+**الـ Installer سيقوم بـ:**
+- ✅ قراءة `deploy.config.json`
+- ✅ إنشاء `.cpanel.yml` تلقائياً
+- ✅ إنشاء `.github/workflows/deploy-cpanel.yml` تلقائياً
+- ✅ إنشاء `GITHUB_SECRETS_INSTRUCTIONS.txt`
+
+### 4️⃣ إضافة GitHub Secret
+
+افتح `GITHUB_SECRETS_INSTRUCTIONS.txt` واتبع التعليمات.
+
+### 5️⃣ النشر!
 
 ```bash
 git push origin main
 ```
 
-النشر التلقائي سيعمل! 🎉
+**انتهى! 🎉**
 
 ---
 
-## 📝 بديل: التعديل اليدوي
+## 📝 ملاحظة
 
-إذا لم تريد استخدام Installer:
+**ملف `deploy.config.json` واحد يحتوي على كل شيء:**
+- ✅ APP_NAME, APP_URL
+- ✅ Database credentials
+- ✅ cPanel connection
+- ✅ GitHub Secret name
 
-### 1. أعد تسمية Templates
-
-```bash
-mv .cpanel.yml.template .cpanel.yml
-mv .github/workflows/deploy-cpanel.yml.template .github/workflows/deploy-cpanel.yml
-```
-
-### 2. عدل 3 متغيرات في `.cpanel.yml`:
-
-- السطر 102: `APP_NAME=your_app_name`
-- السطر 110: `APP_URL=https://your-domain.com`
-- السطور 140-144: `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`
-
-### 3. عدل Secret name في `.github/workflows/deploy-cpanel.yml`:
-
-- السطر 25: `${{ secrets.YOUR_PROJECT_CPANEL_SECRET }}`
-
----
-
-**هذا كل شيء!** 🚀
-
+**لا حاجة لتعديل ملفات متعددة - ملف واحد فقط!**
