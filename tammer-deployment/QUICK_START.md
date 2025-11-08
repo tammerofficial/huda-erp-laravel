@@ -5,8 +5,8 @@
 ### 1️⃣ نسخ الملفات
 
 ```bash
-cp -r tammer-laravel-skeleton/* /path/to/your/new-project/
-cp -r tammer-laravel-skeleton/.github /path/to/your/new-project/
+cp -r tammer-deployment/* /path/to/your/new-project/
+cp -r tammer-deployment/.github /path/to/your/new-project/
 ```
 
 ### 2️⃣ إعداد ملف Config

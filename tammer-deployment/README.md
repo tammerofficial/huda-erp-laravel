@@ -1,6 +1,6 @@
-# 🚀 Tammer Laravel Skeleton
+# 🚀 Tammer Deployment
 
-Laravel Skeleton جاهز للنشر التلقائي على cPanel مع Tailwind CSS و CI/CD.
+Laravel Deployment Kit جاهز للنشر التلقائي على cPanel مع Tailwind CSS و CI/CD.
 
 ## 📦 المميزات
 
@@ -18,8 +18,8 @@ Laravel Skeleton جاهز للنشر التلقائي على cPanel مع Tailwin
 
 ```bash
 # 1. انسخ الملفات إلى مشروعك الجديد
-cp -r tammer-laravel-skeleton/* /path/to/your/new-project/
-cp -r tammer-laravel-skeleton/.github /path/to/your/new-project/
+cp -r tammer-deployment/* /path/to/your/new-project/
+cp -r tammer-deployment/.github /path/to/your/new-project/
 
 # 2. انسخ ملف Config واملأه
 cp deploy.config.json.example deploy.config.json
@@ -79,7 +79,7 @@ bash install.sh
 ## 📁 هيكل الملفات
 
 ```
-tammer-laravel-skeleton/
+tammer-deployment/
 ├── .cpanel.yml.template          # Template للنشر (يُعدّل تلقائياً)
 ├── .github/
 │   └── workflows/
@@ -99,8 +99,8 @@ tammer-laravel-skeleton/
 ### 1. نسخ الملفات
 
 ```bash
-cp -r tammer-laravel-skeleton/* /path/to/new-project/
-cp -r tammer-laravel-skeleton/.github /path/to/new-project/
+cp -r tammer-deployment/* /path/to/new-project/
+cp -r tammer-deployment/.github /path/to/new-project/
 ```
 
 ### 2. إعداد ملف Config

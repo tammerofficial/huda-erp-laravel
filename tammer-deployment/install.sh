@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Tammer Laravel Deploy Kit Installer
+# Tammer Deployment Installer
 # Reads deploy.config.json and automatically configures all files
 
 set -e
 
-echo "🚀 Tammer Laravel Deploy Kit Installer"
+echo "🚀 Tammer Deployment Installer"
 echo "======================================"
 echo ""
 
