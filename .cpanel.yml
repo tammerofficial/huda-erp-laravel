@@ -87,6 +87,9 @@ deployment:
 DirectoryIndex index.php index.html
 HTACCESS
     - chmod 644 .htaccess
+    # If existing .htaccess was used, enforce DirectoryIndex and disable listing
+    - grep -q -i "^DirectoryIndex" .htaccess || echo "DirectoryIndex index.php index.html" >> .htaccess
+    - grep -qi "Options -Indexes" .htaccess || echo "Options -Indexes" >> .htaccess
     - test -f .env || cp .env.example .env 2>/dev/null || touch .env
     - sed -i 's/DB_CONNECTION=msyql/DB_CONNECTION=mysql/g' .env
     - sed -i 's/DB_CONNECTION=msql/DB_CONNECTION=mysql/g' .env
