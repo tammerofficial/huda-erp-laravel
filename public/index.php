@@ -5,11 +5,30 @@ use Illuminate\Http\Request;
 
 define('LARAVEL_START', microtime(true));
 
-// Determine the base path - handle both standard Laravel and cPanel deployments
+// For cPanel: everything is in public_html, so base path is __DIR__
 $basePath = __DIR__;
-// For cPanel: if vendor doesn't exist here, check parent directory
-if (!file_exists($basePath.'/vendor/autoload.php') && file_exists($basePath.'/../vendor/autoload.php')) {
-    $basePath = __DIR__.'/..';
+
+// Check if vendor exists (required for Laravel)
+if (!file_exists($basePath.'/vendor/autoload.php')) {
+    http_response_code(500);
+    die('
+    <h1>Laravel Installation Error</h1>
+    <p><strong>Error:</strong> Composer dependencies not found.</p>
+    <p><strong>Solution:</strong> Run <code>composer install</code> in the deployment directory.</p>
+    <p><strong>Expected path:</strong> ' . htmlspecialchars($basePath.'/vendor/autoload.php') . '</p>
+    <p><strong>Current directory:</strong> ' . htmlspecialchars(__DIR__) . '</p>
+    ');
+}
+
+// Check if bootstrap exists
+if (!file_exists($basePath.'/bootstrap/app.php')) {
+    http_response_code(500);
+    die('
+    <h1>Laravel Bootstrap Error</h1>
+    <p><strong>Error:</strong> Bootstrap file not found.</p>
+    <p><strong>Expected path:</strong> ' . htmlspecialchars($basePath.'/bootstrap/app.php') . '</p>
+    <p><strong>Current directory:</strong> ' . htmlspecialchars(__DIR__) . '</p>
+    ');
 }
 
 // Determine if the application is in maintenance mode...

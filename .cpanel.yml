@@ -200,7 +200,9 @@ ENVCPANEL
     # Remove any Reverb vars to avoid leaking localhost defaults in built assets
     - sed -i '/^REVERB_/d' .env 2>/dev/null || true
     - sed -i '/^VITE_REVERB_/d' .env 2>/dev/null || true
-    - composer install --optimize-autoloader --no-dev --no-interaction
+    - composer install --optimize-autoloader --no-dev --no-interaction || { echo "ERROR: composer install failed"; exit 1; }
+    - test -f vendor/autoload.php || { echo "ERROR: vendor/autoload.php not found after composer install"; exit 1; }
+    - echo "Composer dependencies installed successfully"
     - npm install --production
     - rm -rf public/build
     - npm run build
