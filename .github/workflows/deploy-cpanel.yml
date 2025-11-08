@@ -15,22 +15,55 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Parse cPanel connection secret
+        id: parse
+        shell: bash
+        run: |
+          set -e
+          # Write environment secret to a temp file
+          cat > .cpanel_secret <<'EOF'
+          ${{ secrets.WORKSHOP_HOSTINGER_CP }}
+          EOF
+          # Normalize CRLF -> LF
+          sed -i 's/\r$//' .cpanel_secret
+          # Extract fields
+          getv () { grep -E "^[[:space:]]*$1[[:space:]]*=" .cpanel_secret | head -1 | sed -E "s/^[[:space:]]*$1[[:space:]]*=[[:space:]]*//" ; }
+          HOST="$(getv CPANEL_HOST)"
+          USER="$(getv CPANEL_USER)"
+          PASS="$(getv CPANEL_PASSWORD)"
+          PORT="$(getv CPANEL_PORT)"
+          REPO_PATH="$(getv CPANEL_REPO_PATH)"
+          # Defaults
+          [ -z "$PORT" ] && PORT="22"
+          # Basic validation
+          echo "Parsed:"
+          echo "  HOST=${HOST:-<empty>}"
+          echo "  USER=${USER:-<empty>}"
+          echo "  PORT=${PORT:-<empty>}"
+          echo "  REPO_PATH=${REPO_PATH:-<empty>}"
+          if [ -z "$HOST" ] || [ -z "$USER" ] || [ -z "$PASS" ] || [ -z "$REPO_PATH" ]; then
+            echo "::error::Missing one or more required keys in WORKSHOP_HOSTINGER_CP. Expecting lines: CPANEL_HOST=..., CPANEL_USER=..., CPANEL_PASSWORD=..., CPANEL_REPO_PATH=..., optional CPANEL_PORT=22"
+            exit 1
+          fi
+          echo "host=$HOST" >> "$GITHUB_OUTPUT"
+          echo "user=$USER" >> "$GITHUB_OUTPUT"
+          echo "password=$PASS" >> "$GITHUB_OUTPUT"
+          echo "port=$PORT" >> "$GITHUB_OUTPUT"
+          echo "repo_path=$REPO_PATH" >> "$GITHUB_OUTPUT"
+
       - name: SSH to cPanel and pull latest (triggers .cpanel.yml deployment)
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.CPANEL_HOST }}
-          username: ${{ secrets.CPANEL_USER }}
-          key: ${{ secrets.CPANEL_SSH_KEY }}
-          port: ${{ secrets.CPANEL_PORT || 22 }}
+          host: ${{ steps.parse.outputs.host }}
+          username: ${{ steps.parse.outputs.user }}
+          password: ${{ steps.parse.outputs.password }}
+          port: ${{ steps.parse.outputs.port }}
           script_stop: true
           script: |
             set -e
-            echo "Deploying tag $GITHUB_REF_NAME"
-            # Path to the cPanel-managed git repository
-            REPO_PATH=${{ secrets.CPANEL_REPO_PATH }}
-            if [ -z "$REPO_PATH" ]; then
-              echo "ERROR: CPANEL_REPO_PATH secret is not set"; exit 1;
-            fi
+            echo "Deploying ref $GITHUB_REF"
+            REPO_PATH='${{ steps.parse.outputs.repo_path }}'
+            echo "Using REPO_PATH=$REPO_PATH"
             cd "$REPO_PATH"
             git fetch --all
             git checkout main
