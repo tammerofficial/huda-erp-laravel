@@ -207,21 +207,32 @@ ENVCPANEL
     - chmod -R 775 bootstrap/cache
     # Check if database credentials are set before running migrations
     - |
-      if grep -q "^DB_DATABASE=$" .env || grep -q "^DB_USERNAME=$" .env || grep -q "^DB_PASSWORD=$" .env || ! grep -q "^DB_DATABASE=" .env || ! grep -q "^DB_USERNAME=" .env || ! grep -q "^DB_PASSWORD=" .env; then
+      DB_DB=$(grep -E '^DB_DATABASE=' .env | cut -d= -f2- | tr -d '"')
+      DB_USER=$(grep -E '^DB_USERNAME=' .env | cut -d= -f2- | tr -d '"')
+      DB_PASS=$(grep -E '^DB_PASSWORD=' .env | cut -d= -f2- | tr -d '"')
+
+      if [ -z "$DB_DB" ] || [ -z "$DB_USER" ] || [ -z "$DB_PASS" ] || [ "$DB_USER" = "root" ]; then
         echo "=========================================="
-        echo "WARNING: Database credentials are not set!"
+        echo "WARNING: Invalid DB credentials for migrations"
+        echo "------------------------------------------"
+        echo "Detected:"
+        echo "  - DB_DATABASE='${DB_DB:-EMPTY}'"
+        echo "  - DB_USERNAME='${DB_USER:-EMPTY}'"
+        echo "  - DB_PASSWORD='$( [ -z "$DB_PASS" ] && echo EMPTY || echo SET )'"
         echo "=========================================="
-        echo "Please update the following in .env file:"
-        echo "  - DB_DATABASE=your_database_name"
-        echo "  - DB_USERNAME=your_database_user"
-        echo "  - DB_PASSWORD=your_database_password"
+        echo "Please update .env with your cPanel MySQL credentials:"
+        echo "  DB_HOST=127.0.0.1"
+        echo "  DB_PORT=3306"
+        echo "  DB_DATABASE=your_database_name"
+        echo "  DB_USERNAME=your_database_user"
+        echo "  DB_PASSWORD=your_database_password"
         echo ""
-        echo "After updating, run manually:"
-        echo "  php artisan migrate --force"
+        echo "After updating, run:"
+        echo "  php artisan config:clear && php artisan migrate --force"
         echo "=========================================="
       else
-        echo "Database credentials found. Running migrations..."
-        php artisan migrate --force || echo "Migration failed. Please check database credentials and connection."
+        echo "Database credentials look valid. Running migrations..."
+        php artisan migrate --force || echo "Migration failed. Please verify DB host/user/password and privileges."
       fi
     - php artisan config:clear
     - php artisan cache:clear
