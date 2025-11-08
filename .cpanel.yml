@@ -1,0 +1,251 @@
+# cPanel Deployment Configuration
+# Version: v1.0.3
+# Description: Automatic deployment script for Huda ERP Laravel to cPanel/Hostinger
+# Changes: Fixed .htaccess deployment, added file protection, and improved database migration handling
+# Setup Instructions:
+#   1. Go to cPanel » Files » Git Version Control
+#   2. Click "Create" and enter:
+#      - Repository Name: huda-erp-laravel
+#      - Clone URL: https://github.com/tammerofficial/huda-erp-laravel.git
+#      - Branch: main
+#   3. After creation, cPanel automatically adds post-receive hook
+#   4. For automatic deployment: Use "Update from Remote" then "Deploy HEAD Commit"
+#   5. Or set up webhook/cron for fully automatic deployment
+# Commit Format: vX.X.X - Description of changes
+# Last Updated: 2025-01-XX
+
+deployment:
+  tasks:
+    - export DEPLOYPATH=$HOME/public_html
+    - /bin/cp -R app $DEPLOYPATH/
+    - /bin/cp -R bootstrap $DEPLOYPATH/
+    - /bin/cp -R config $DEPLOYPATH/
+    - /bin/cp -R database $DEPLOYPATH/
+    - /bin/cp -R resources $DEPLOYPATH/
+    - /bin/cp -R routes $DEPLOYPATH/
+    - /bin/cp -R tests $DEPLOYPATH/
+    - /bin/cp -R storage $DEPLOYPATH/
+    - /bin/cp artisan $DEPLOYPATH/
+    - /bin/cp composer.json $DEPLOYPATH/
+    - /bin/cp composer.lock $DEPLOYPATH/
+    - /bin/cp package.json $DEPLOYPATH/
+    - /bin/cp package-lock.json $DEPLOYPATH/
+    - /bin/cp vite.config.js $DEPLOYPATH/
+    - /bin/cp tailwind.config.js $DEPLOYPATH/
+    - /bin/cp phpunit.xml $DEPLOYPATH/
+    # Copy public directory contents including hidden files
+    - /bin/cp -R public/. $DEPLOYPATH/ 2>/dev/null || /bin/cp -R public/* $DEPLOYPATH/ 2>/dev/null || true
+    # Ensure .htaccess is copied (it might be hidden)
+    - /bin/cp public/.htaccess $DEPLOYPATH/.htaccess 2>/dev/null || true
+    - cd $DEPLOYPATH
+    # Fix index.php paths since everything is in public_html (replace ../ with ./)
+    - sed -i "s|__DIR__\.'/\.\./|__DIR__.'/|g" index.php
+    # Fallback variants (handle different quoting/spacing just in case)
+    - sed -i "s|__DIR__\"/\\\.\\\./|__DIR__\"/|g" index.php 2>/dev/null || true
+    - sed -i "s|__DIR__ . '/\\\.\\\./|__DIR__ . '/|g" index.php 2>/dev/null || true
+    # Ensure .htaccess exists and has correct permissions
+    - test -f .htaccess || cat > .htaccess << 'HTACCESS'
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    RewriteEngine On
+    RewriteBase /
+
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Handle X-XSRF-Token Header
+    RewriteCond %{HTTP:x-xsrf-token} .
+    RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
+
+    # Redirect Trailing Slashes If Not A Folder...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # Send Requests To Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# Protect sensitive files from direct access
+<FilesMatch "^(\.env|\.git|composer\.(json|lock)|package(-lock)?\.json|\.cpanel\.yml|\.md|\.sh|update_.*\.php)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Ensure DirectoryIndex prefers PHP front controller
+DirectoryIndex index.php index.html
+HTACCESS
+    - chmod 644 .htaccess
+    - test -f .env || cp .env.example .env 2>/dev/null || touch .env
+    - sed -i 's/DB_CONNECTION=msyql/DB_CONNECTION=mysql/g' .env
+    - sed -i 's/DB_CONNECTION=msql/DB_CONNECTION=mysql/g' .env
+    - grep -q "APP_KEY=" .env || php artisan key:generate --force
+    # Apply provided environment configuration
+    - cat > .env.cpanel << 'ENVCPANEL'
+APP_NAME=huda
+
+APP_ENV=production
+
+APP_KEY=
+
+APP_DEBUG=true
+
+APP_URL=https://workshop.hudaaljarallah.net
+
+APP_LOCALE=en
+
+APP_FALLBACK_LOCALE=en
+
+APP_FAKER_LOCALE=en_US
+
+APP_MAINTENANCE_DRIVER=file
+
+# APP_MAINTENANCE_STORE=database
+
+PHP_CLI_SERVER_WORKERS=4
+
+BCRYPT_ROUNDS=12
+
+LOG_CHANNEL=stack
+
+LOG_STACK=single
+
+LOG_DEPRECATIONS_CHANNEL=null
+
+LOG_LEVEL=debug
+
+DB_CONNECTION=mysql
+
+DB_HOST=127.0.0.1
+
+DB_PORT=3306
+
+# IMPORTANT: Update these database credentials from your cPanel MySQL section
+DB_DATABASE=
+
+DB_USERNAME=
+
+DB_PASSWORD=
+
+SESSION_DRIVER=database
+
+SESSION_LIFETIME=120
+
+SESSION_ENCRYPT=false
+
+SESSION_PATH=/
+
+SESSION_DOMAIN=null
+
+BROADCAST_CONNECTION=log
+
+FILESYSTEM_DISK=local
+
+QUEUE_CONNECTION=database
+
+CACHE_STORE=database
+
+# CACHE_PREFIX=
+
+MEMCACHED_HOST=127.0.0.1
+
+REDIS_CLIENT=phpredis
+
+REDIS_HOST=127.0.0.1
+
+REDIS_PASSWORD=null
+
+REDIS_PORT=6379
+
+MAIL_MAILER=log
+
+MAIL_SCHEME=null
+
+MAIL_HOST=127.0.0.1
+
+MAIL_PORT=2525
+
+MAIL_USERNAME=null
+
+MAIL_PASSWORD=null
+
+MAIL_FROM_ADDRESS="hello@example.com"
+
+MAIL_FROM_NAME="${APP_NAME}"
+
+AWS_ACCESS_KEY_ID=
+
+AWS_SECRET_ACCESS_KEY=
+
+AWS_DEFAULT_REGION=us-east-1
+
+AWS_BUCKET=
+
+AWS_USE_PATH_STYLE_ENDPOINT=false
+
+VITE_APP_NAME="${APP_NAME}"
+ENVCPANEL
+    - for K in APP_NAME APP_ENV APP_KEY APP_DEBUG APP_URL APP_LOCALE APP_FALLBACK_LOCALE APP_FAKER_LOCALE APP_MAINTENANCE_DRIVER PHP_CLI_SERVER_WORKERS BCRYPT_ROUNDS LOG_CHANNEL LOG_STACK LOG_DEPRECATIONS_CHANNEL LOG_LEVEL DB_CONNECTION DB_HOST DB_PORT DB_DATABASE DB_USERNAME DB_PASSWORD SESSION_DRIVER SESSION_LIFETIME SESSION_ENCRYPT SESSION_PATH SESSION_DOMAIN BROADCAST_CONNECTION FILESYSTEM_DISK QUEUE_CONNECTION CACHE_STORE MEMCACHED_HOST REDIS_CLIENT REDIS_HOST REDIS_PASSWORD REDIS_PORT MAIL_MAILER MAIL_SCHEME MAIL_HOST MAIL_PORT MAIL_USERNAME MAIL_PASSWORD MAIL_FROM_ADDRESS MAIL_FROM_NAME AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_DEFAULT_REGION AWS_BUCKET AWS_USE_PATH_STYLE_ENDPOINT VITE_APP_NAME REVERB_APP_ID REVERB_APP_KEY REVERB_APP_SECRET REVERB_HOST REVERB_PORT REVERB_SCHEME VITE_REVERB_APP_KEY VITE_REVERB_HOST VITE_REVERB_PORT VITE_REVERB_SCHEME; do sed -i "/^$K=/d" .env 2>/dev/null || true; done
+    - cat .env.cpanel >> .env
+    # Fully disable realtime on production (clean, no WebSocket attempts)
+    - sed -i '/^BROADCAST_CONNECTION=/d' .env
+    - echo "BROADCAST_CONNECTION=log" >> .env
+    - sed -i '/^VITE_ENABLE_ECHO=/d' .env
+    - echo "VITE_ENABLE_ECHO=false" >> .env
+    # Remove any Reverb vars to avoid leaking localhost defaults in built assets
+    - sed -i '/^REVERB_/d' .env 2>/dev/null || true
+    - sed -i '/^VITE_REVERB_/d' .env 2>/dev/null || true
+    - composer install --optimize-autoloader --no-dev --no-interaction
+    - npm install --production
+    - rm -rf public/build
+    - npm run build
+    - chmod -R 775 storage
+    - chmod -R 775 bootstrap/cache
+    # Check if database credentials are set before running migrations
+    - |
+      DB_DB=$(grep -E '^DB_DATABASE=' .env | cut -d= -f2- | tr -d '"')
+      DB_USER=$(grep -E '^DB_USERNAME=' .env | cut -d= -f2- | tr -d '"')
+      DB_PASS=$(grep -E '^DB_PASSWORD=' .env | cut -d= -f2- | tr -d '"')
+
+      if [ -z "$DB_DB" ] || [ -z "$DB_USER" ] || [ -z "$DB_PASS" ] || [ "$DB_USER" = "root" ]; then
+        echo "=========================================="
+        echo "WARNING: Invalid DB credentials for migrations"
+        echo "------------------------------------------"
+        echo "Detected:"
+        echo "  - DB_DATABASE='${DB_DB:-EMPTY}'"
+        echo "  - DB_USERNAME='${DB_USER:-EMPTY}'"
+        echo "  - DB_PASSWORD='$( [ -z "$DB_PASS" ] && echo EMPTY || echo SET )'"
+        echo "=========================================="
+        echo "Please update .env with your cPanel MySQL credentials:"
+        echo "  DB_HOST=127.0.0.1"
+        echo "  DB_PORT=3306"
+        echo "  DB_DATABASE=your_database_name"
+        echo "  DB_USERNAME=your_database_user"
+        echo "  DB_PASSWORD=your_database_password"
+        echo ""
+        echo "After updating, run:"
+        echo "  php artisan config:clear && php artisan migrate --force"
+        echo "=========================================="
+      else
+        echo "Database credentials look valid. Running migrations..."
+        php artisan migrate --force || echo "Migration failed. Please verify DB host/user/password and privileges."
+      fi
+    - php artisan config:clear
+    - php artisan cache:clear
+    - php artisan route:clear
+    - php artisan view:clear
+    - php artisan config:cache
+    - php artisan route:cache
+    - php artisan view:cache
+
