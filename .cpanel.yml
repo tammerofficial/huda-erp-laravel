@@ -97,7 +97,7 @@ APP_NAME=huda
 
 APP_ENV=production
 
-APP_KEY=
+APP_KEY=base64:muEnmHDuBWwChBg2EfGKwSF0UmHomkluMnd86CxA9Hs=
 
 APP_DEBUG=true
 
@@ -131,12 +131,11 @@ DB_HOST=127.0.0.1
 
 DB_PORT=3306
 
-# IMPORTANT: Update these database credentials from your cPanel MySQL section
-DB_DATABASE=
+DB_DATABASE=workshophudaalja_larafh29h
 
-DB_USERNAME=
+DB_USERNAME=workshophudaalja_fasdfw4w3
 
-DB_PASSWORD=
+DB_PASSWORD="CRPw{4TgktmajdJ("
 
 SESSION_DRIVER=database
 
