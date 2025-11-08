@@ -46,12 +46,14 @@ class UserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $request->role,
             'phone' => $request->phone,
             'address' => $request->address,
             'is_active' => $request->boolean('is_active', true),
             'created_by' => auth()->id(),
         ]);
+
+        // Assign role using Spatie Permission
+        $user->assignRole($request->role);
 
         // Create employee record if role is production_staff
         if ($request->role === 'production_staff') {
@@ -105,7 +107,6 @@ class UserController extends Controller
         $userData = [
             'name' => $request->name,
             'email' => $request->email,
-            'role' => $request->role,
             'phone' => $request->phone,
             'address' => $request->address,
             'is_active' => $request->boolean('is_active', true),
@@ -116,6 +117,9 @@ class UserController extends Controller
         }
 
         $user->update($userData);
+        
+        // Update role using Spatie Permission
+        $user->syncRoles([$request->role]);
 
         return redirect()->route('users.index')->with('success', 'تم تحديث المستخدم بنجاح');
     }

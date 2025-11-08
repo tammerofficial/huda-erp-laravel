@@ -15,18 +15,29 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Create roles first
+        $this->call([
+            RolesSeeder::class,
+        ]);
+
         // Create default admin user
-        User::factory()->create([
+        $adminUser = User::factory()->create([
             'name' => 'Admin User',
             'email' => 'admin@hudaerp.com',
             'password' => bcrypt('password'),
         ]);
+        
+        // Assign super_admin role to admin user
+        $adminUser->assignRole('super_admin');
 
         // Create test user
-        User::factory()->create([
+        $testUser = User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
+        
+        // Assign admin role to test user
+        $testUser->assignRole('admin');
 
         // Seed all data in proper order
         $this->call([
@@ -55,8 +66,12 @@ class DatabaseSeeder extends Seeder
         $this->command->info('✅ All data seeded successfully!');
         $this->command->info('');
         $this->command->info('📧 Login Credentials:');
-        $this->command->info('   Email: admin@hudaerp.com');
-        $this->command->info('   Password: password');
+        $this->command->info('   Super Admin:');
+        $this->command->info('      Email: admin@hudaerp.com');
+        $this->command->info('      Password: password');
+        $this->command->info('   Admin:');
+        $this->command->info('      Email: test@example.com');
+        $this->command->info('      Password: password');
         $this->command->info('');
         $this->command->info('🌐 Access the system at: http://127.0.0.1:8000');
         $this->command->info('════════════════════════════════════════════════════════════ 🎉');
