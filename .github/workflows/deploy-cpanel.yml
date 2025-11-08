@@ -67,7 +67,19 @@ jobs:
             cd "$REPO_PATH"
             git fetch --all
             git checkout main
-            git pull origin main
+            # Handle local changes that conflict with incoming changes
+            # Stash local changes to .htaccess and other files if they exist
+            if [ -n "$(git status --porcelain public/.htaccess 2>/dev/null)" ]; then
+              echo "Stashing local changes to public/.htaccess"
+              git stash push -m "Stash local .htaccess before pull" public/.htaccess 2>/dev/null || true
+            fi
+            # Reset any uncommitted changes to tracked files
+            git reset --hard HEAD 2>/dev/null || true
+            # Now pull the latest changes
+            git pull origin main || {
+              echo "Pull failed, trying with reset..."
+              git reset --hard origin/main
+            }
             echo "Pulled latest changes. cPanel post-receive hook should run .cpanel.yml automatically."
 
 
