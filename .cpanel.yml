@@ -43,6 +43,9 @@ deployment:
     # Fallback variants (handle different quoting/spacing just in case)
     - sed -i "s|__DIR__\"/\\\.\\\./|__DIR__\"/|g" index.php 2>/dev/null || true
     - sed -i "s|__DIR__ . '/\\\.\\\./|__DIR__ . '/|g" index.php 2>/dev/null || true
+    # Explicitly fix the two Laravel includes in index.php
+    - sed -i "s|require __DIR__.'/../vendor/autoload.php'|require __DIR__.'/vendor/autoload.php'|g" index.php 2>/dev/null || true
+    - sed -i "s|require_once __DIR__.'/../bootstrap/app.php'|require_once __DIR__.'/bootstrap/app.php'|g" index.php 2>/dev/null || true
     # Ensure .htaccess exists and has correct permissions
     - test -f .htaccess || cat > .htaccess << 'HTACCESS'
 <IfModule mod_rewrite.c>
