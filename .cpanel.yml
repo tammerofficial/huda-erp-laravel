@@ -11,6 +11,7 @@
 #   3. After creation, cPanel automatically adds post-receive hook
 #   4. For automatic deployment: Use "Update from Remote" then "Deploy HEAD Commit"
 #   5. Or set up webhook/cron for fully automatic deployment
+# Commit Format: vX.X.X - Description of changes
 # Last Updated: 2025-01-XX
 
 deployment:
