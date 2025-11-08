@@ -1,18 +1,10 @@
 <IfModule mod_rewrite.c>
-    <IfModule mod_negotiation.c>
-        Options -MultiViews -Indexes
-    </IfModule>
-
     RewriteEngine On
     RewriteBase /
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
-
-    # Handle X-XSRF-Token Header
-    RewriteCond %{HTTP:x-xsrf-token} .
-    RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
 
     # Redirect Trailing Slashes If Not A Folder...
     RewriteCond %{REQUEST_FILENAME} !-d
@@ -25,8 +17,14 @@
     RewriteRule ^ index.php [L]
 </IfModule>
 
-# Protect sensitive files from direct access
-<FilesMatch "^(\.env|\.git|composer\.(json|lock)|package(-lock)?\.json|\.cpanel\.yml|\.md|\.sh|update_.*\.php)$">
+# Disable directory browsing
+Options -Indexes
+
+# Ensure DirectoryIndex prefers PHP front controller
+DirectoryIndex index.php index.html
+
+# Protect sensitive files
+<FilesMatch "^(\.env|\.git|composer\.(json|lock)|package(-lock)?\.json|\.cpanel\.yml|\.md|\.sh|update_.*\.php|artisan)$">
     <IfModule mod_authz_core.c>
         Require all denied
     </IfModule>
@@ -35,6 +33,3 @@
         Deny from all
     </IfModule>
 </FilesMatch>
-
-# Ensure DirectoryIndex prefers PHP front controller
-DirectoryIndex index.php index.html

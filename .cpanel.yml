@@ -26,8 +26,8 @@ deployment:
     - /bin/cp phpunit.xml $DEPLOYPATH/
     # Copy public directory contents including hidden files
     - /bin/cp -R public/. $DEPLOYPATH/ 2>/dev/null || /bin/cp -R public/* $DEPLOYPATH/ 2>/dev/null || true
-    # Ensure .htaccess is copied (it might be hidden)
-    - /bin/cp public/.htaccess $DEPLOYPATH/.htaccess 2>/dev/null || true
+    # Ensure .htaccess is copied (it might be hidden) - Force copy with verbose output
+    - if [ -f public/.htaccess ]; then /bin/cp -v public/.htaccess $DEPLOYPATH/.htaccess && echo ".htaccess copied successfully"; else echo "WARNING: public/.htaccess not found locally"; fi
     - cd $DEPLOYPATH
     # Fix index.php paths since everything is in public_html (replace ../ with ./)
     - sed -i "s|__DIR__\.'/\.\./|__DIR__.'/|g" index.php
