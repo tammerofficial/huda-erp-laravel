@@ -40,6 +40,9 @@ deployment:
     - cd $DEPLOYPATH
     # Fix index.php paths since everything is in public_html (replace ../ with ./)
     - sed -i "s|__DIR__\.'/\.\./|__DIR__.'/|g" index.php
+    # Fallback variants (handle different quoting/spacing just in case)
+    - sed -i "s|__DIR__\"/\\\.\\\./|__DIR__\"/|g" index.php 2>/dev/null || true
+    - sed -i "s|__DIR__ . '/\\\.\\\./|__DIR__ . '/|g" index.php 2>/dev/null || true
     # Ensure .htaccess exists and has correct permissions
     - test -f .htaccess || cat > .htaccess << 'HTACCESS'
 <IfModule mod_rewrite.c>
@@ -48,6 +51,7 @@ deployment:
     </IfModule>
 
     RewriteEngine On
+    RewriteBase /
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
@@ -78,6 +82,9 @@ deployment:
         Deny from all
     </IfModule>
 </FilesMatch>
+
+# Ensure DirectoryIndex prefers PHP front controller
+DirectoryIndex index.php index.html
 HTACCESS
     - chmod 644 .htaccess
     - test -f .env || cp .env.example .env 2>/dev/null || touch .env
