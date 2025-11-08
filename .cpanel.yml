@@ -212,6 +212,8 @@ ENVCPANEL
     - npm run build
     - chmod -R 775 storage
     - chmod -R 775 bootstrap/cache
+    # Ensure fresh config is loaded for migrations (spatie/permission relies on config merge)
+    - php artisan config:clear
     # Check if database credentials are set before running migrations
     - |
       DB_DB=$(grep -E '^DB_DATABASE=' .env | cut -d= -f2- | tr -d '"')
@@ -239,7 +241,9 @@ ENVCPANEL
         echo "=========================================="
       else
         echo "Database credentials look valid. Running migrations..."
-        php artisan migrate --force || echo "Migration failed. Please verify DB host/user/password and privileges."
+        php artisan migrate --force || { echo "Migration failed. Please verify DB host/user/password and privileges." ; exit 1; }
+        echo "Running seeders (RolesSeeder)..."
+        php artisan db:seed --class=Database\\Seeders\\RolesSeeder --force || { echo "Seeding failed. Please check RolesSeeder and DB state." ; exit 1; }
       fi
     - php artisan config:clear
     - php artisan cache:clear
