@@ -1,6 +1,7 @@
 # cPanel Deployment Configuration
-# Version: v1.0.0
+# Version: v1.0.1
 # Description: Automatic deployment script for Huda ERP Laravel to cPanel/Hostinger
+# Changes: Fixed .htaccess deployment and improved database migration handling
 # Last Updated: 2025-01-XX
 
 deployment:
@@ -22,10 +23,50 @@ deployment:
     - /bin/cp vite.config.js $DEPLOYPATH/
     - /bin/cp tailwind.config.js $DEPLOYPATH/
     - /bin/cp phpunit.xml $DEPLOYPATH/
+    # Copy public directory contents including hidden files
     - /bin/cp -R public/. $DEPLOYPATH/ 2>/dev/null || /bin/cp -R public/* $DEPLOYPATH/ 2>/dev/null || true
+    # Ensure .htaccess is copied (it might be hidden)
+    - /bin/cp public/.htaccess $DEPLOYPATH/.htaccess 2>/dev/null || true
     - cd $DEPLOYPATH
     # Fix index.php paths since everything is in public_html (replace ../ with ./)
     - sed -i "s|__DIR__\.'/\.\./|__DIR__.'/|g" index.php
+    # Ensure .htaccess exists and has correct permissions
+    - test -f .htaccess || cat > .htaccess << 'HTACCESS'
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    RewriteEngine On
+
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Handle X-XSRF-Token Header
+    RewriteCond %{HTTP:x-xsrf-token} .
+    RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
+
+    # Redirect Trailing Slashes If Not A Folder...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # Send Requests To Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
+HTACCESS
+    - chmod 644 .htaccess
+    # Create .htaccess to protect sensitive files (optional security)
+    - cat > .htaccess-protect << 'HTACCESS_PROTECT'
+# Protect sensitive files
+<FilesMatch "^(\.env|\.git|composer\.(json|lock)|package(-lock)?\.json|\.cpanel\.yml|\.md)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+HTACCESS_PROTECT
     - test -f .env || cp .env.example .env 2>/dev/null || touch .env
     - sed -i 's/DB_CONNECTION=msyql/DB_CONNECTION=mysql/g' .env
     - sed -i 's/DB_CONNECTION=msql/DB_CONNECTION=mysql/g' .env
@@ -152,7 +193,23 @@ ENVCPANEL
     - chmod -R 775 storage
     - chmod -R 775 bootstrap/cache
     # Check if database credentials are set before running migrations
-    - if grep -q "^DB_DATABASE=$" .env || grep -q "^DB_USERNAME=$" .env || grep -q "^DB_PASSWORD=$" .env; then echo "WARNING: Database credentials are not set. Please update DB_DATABASE, DB_USERNAME, and DB_PASSWORD in .env file before running migrations."; else php artisan migrate --force; fi
+    - |
+      if grep -q "^DB_DATABASE=$" .env || grep -q "^DB_USERNAME=$" .env || grep -q "^DB_PASSWORD=$" .env || ! grep -q "^DB_DATABASE=" .env || ! grep -q "^DB_USERNAME=" .env || ! grep -q "^DB_PASSWORD=" .env; then
+        echo "=========================================="
+        echo "WARNING: Database credentials are not set!"
+        echo "=========================================="
+        echo "Please update the following in .env file:"
+        echo "  - DB_DATABASE=your_database_name"
+        echo "  - DB_USERNAME=your_database_user"
+        echo "  - DB_PASSWORD=your_database_password"
+        echo ""
+        echo "After updating, run manually:"
+        echo "  php artisan migrate --force"
+        echo "=========================================="
+      else
+        echo "Database credentials found. Running migrations..."
+        php artisan migrate --force || echo "Migration failed. Please check database credentials and connection."
+      fi
     - php artisan config:clear
     - php artisan cache:clear
     - php artisan route:clear
