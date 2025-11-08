@@ -1,0 +1,38 @@
+name: Deploy to cPanel (via SSH)
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: SSH to cPanel and pull latest (triggers .cpanel.yml deployment)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.CPANEL_HOST }}
+          username: ${{ secrets.CPANEL_USER }}
+          key: ${{ secrets.CPANEL_SSH_KEY }}
+          port: ${{ secrets.CPANEL_PORT || 22 }}
+          script_stop: true
+          script: |
+            set -e
+            echo "Deploying tag $GITHUB_REF_NAME"
+            # Path to the cPanel-managed git repository
+            REPO_PATH=${{ secrets.CPANEL_REPO_PATH }}
+            if [ -z "$REPO_PATH" ]; then
+              echo "ERROR: CPANEL_REPO_PATH secret is not set"; exit 1;
+            fi
+            cd "$REPO_PATH"
+            git fetch --all
+            git checkout main
+            git pull origin main
+            echo "Pulled latest changes. cPanel post-receive hook should run .cpanel.yml automatically."
+
+

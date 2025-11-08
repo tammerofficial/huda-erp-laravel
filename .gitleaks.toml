@@ -1,0 +1,20 @@
+# Basic Gitleaks configuration with allowlist examples
+
+[allowlist]
+description = "Global allowlist"
+paths = [
+  "node_modules/",
+  "vendor/",
+  "public/build/",
+  "storage/",
+  ".git/",
+]
+commits = []
+repos = []
+regexTarget = "line"
+regexes = [
+  # Allow common placeholders
+  '''(?i)(example|placeholder|dummy)[-_]?(key|secret|token)''',
+]
+
+
