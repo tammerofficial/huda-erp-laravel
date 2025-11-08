@@ -1,7 +1,16 @@
 # cPanel Deployment Configuration
-# Version: v1.0.2
+# Version: v1.0.3
 # Description: Automatic deployment script for Huda ERP Laravel to cPanel/Hostinger
 # Changes: Fixed .htaccess deployment, added file protection, and improved database migration handling
+# Setup Instructions:
+#   1. Go to cPanel » Files » Git Version Control
+#   2. Click "Create" and enter:
+#      - Repository Name: huda-erp-laravel
+#      - Clone URL: https://github.com/tammerofficial/huda-erp-laravel.git
+#      - Branch: main
+#   3. After creation, cPanel automatically adds post-receive hook
+#   4. For automatic deployment: Use "Update from Remote" then "Deploy HEAD Commit"
+#   5. Or set up webhook/cron for fully automatic deployment
 # Last Updated: 2025-01-XX
 
 deployment:
